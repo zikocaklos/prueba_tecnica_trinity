@@ -1,0 +1,20 @@
+/* Minimal global styles (tailwind disabled temporarily to avoid build errors)
+   Re-enable Tailwind utilities after resolving PostCSS/Turbopack config. */
+
+html, body, #__next {
+  height: 100%;
+}
+
+body {
+  background: #f8fafc; /* light slate */
+  color: #0f172a; /* slate-900 */
+  font-family: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+}
+
+.container {
+  max-width: 80rem;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
