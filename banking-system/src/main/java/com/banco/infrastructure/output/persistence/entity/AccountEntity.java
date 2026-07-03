@@ -1,6 +1,5 @@
 package com.banco.infrastructure.output.persistence.entity;
 
-import com.banco.domain.model.Account;
 import com.banco.domain.enums.AccountStatus;
 import com.banco.domain.enums.AccountType;
 import jakarta.persistence.*;
@@ -44,34 +43,4 @@ public class AccountEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "client_id", nullable = false)
     private ClientEntity client;
-
-    public Account toModel() {
-        return Account.builder()
-                .id(id)
-                .accountNumber(accountNumber)
-                .accountType(accountType)
-                .status(status)
-                .balance(balance)
-                .exemptGmf(exemptGmf)
-                .createdAt(createdAt)
-                .updatedAt(updatedAt)
-                .client(client != null ? client.toModel() : null)
-                .deleted(deleted != null ? deleted : false)
-                .build();
-    }
-
-    public static AccountEntity fromModel(Account account) {
-        return AccountEntity.builder()
-                .id(account.getId())
-                .accountNumber(account.getAccountNumber())
-                .accountType(account.getAccountType())
-                .status(account.getStatus())
-                .balance(account.getBalance())
-                .exemptGmf(account.getExemptGmf())
-                .createdAt(account.getCreatedAt())
-                .updatedAt(account.getUpdatedAt())
-                .client(account.getClient() != null ? ClientEntity.fromModel(account.getClient()) : null)
-                .deleted(account.getDeleted())
-                .build();
-    }
 }

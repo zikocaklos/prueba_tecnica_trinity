@@ -44,21 +44,21 @@ export function AccountTable({ data, loading, onView, onEdit, onDelete }: Props)
   }
 
   return (
-    <div className="overflow-x-auto rounded-3xl border border-slate-200 bg-white shadow-sm">
-      <table className="min-w-full divide-y divide-slate-200">
-        <thead className="bg-slate-50">
+    <div className="overflow-x-auto rounded-[28px] border border-slate-200 bg-white shadow-sm">
+      <table className="min-w-full border-separate border-spacing-y-3">
+        <thead className="bg-slate-50 rounded-t-[28px]">
           <tr>
-            <th className="px-4 py-4 text-left text-sm font-semibold uppercase tracking-[0.24em] text-slate-500">Número Cuenta</th>
+            <th className="rounded-tl-[28px] px-4 py-4 text-left text-sm font-semibold uppercase tracking-[0.24em] text-slate-500">Número Cuenta</th>
             <th className="px-4 py-4 text-left text-sm font-semibold uppercase tracking-[0.24em] text-slate-500">Tipo Cuenta</th>
             <th className="px-4 py-4 text-left text-sm font-semibold uppercase tracking-[0.24em] text-slate-500">Cliente</th>
             <th className="px-4 py-4 text-right text-sm font-semibold uppercase tracking-[0.24em] text-slate-500">Saldo</th>
             <th className="px-4 py-4 text-left text-sm font-semibold uppercase tracking-[0.24em] text-slate-500">Estado</th>
             <th className="px-4 py-4 text-left text-sm font-semibold uppercase tracking-[0.24em] text-slate-500">Exenta GMF</th>
             <th className="px-4 py-4 text-left text-sm font-semibold uppercase tracking-[0.24em] text-slate-500">Fecha Creación</th>
-            <th className="px-4 py-4 text-right text-sm font-semibold uppercase tracking-[0.24em] text-slate-500">Acciones</th>
+            <th className="rounded-tr-[28px] px-4 py-4 text-right text-sm font-semibold uppercase tracking-[0.24em] text-slate-500">Acciones</th>
           </tr>
         </thead>
-        <tbody className="divide-y divide-slate-200 bg-white">
+        <tbody className="bg-transparent">
           {data.map((account) => (
             <tr key={account.id} className="hover:bg-slate-50">
               <td className="px-4 py-4 text-sm text-slate-700">{account.accountNumber}</td>

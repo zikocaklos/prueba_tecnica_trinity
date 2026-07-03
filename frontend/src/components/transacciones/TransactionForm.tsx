@@ -1,7 +1,6 @@
 "use client"
 
-import { useEffect } from 'react'
-import { useForm } from 'react-hook-form'
+import { useWatch, useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { transactionSchema, TransactionFormValues } from '../../schemas/transaction.schema'
 import { Account } from '../../types/account'
@@ -22,25 +21,24 @@ type Props = {
 }
 
 export function TransactionForm({ accounts, defaultValues, onSubmit }: Props) {
+  const initialValues: Partial<TransactionFormValues> = {
+    type: 'DEPOSIT',
+    amount: 0,
+    ...defaultValues,
+  }
+
   const {
     register,
-    watch,
+    control,
     handleSubmit,
-    setValue,
     formState: { errors, isSubmitting },
   } = useForm<TransactionFormValues>({
     resolver: zodResolver(transactionSchema),
-    defaultValues,
+    defaultValues: initialValues,
+    shouldUnregister: true,
   })
 
-  const type = watch('type') || defaultValues?.type || 'DEPOSIT'
-
-  useEffect(() => {
-    if (!defaultValues) {
-      setValue('type', 'DEPOSIT')
-      setValue('amount', 0)
-    }
-  }, [defaultValues, setValue])
+  const type = useWatch({ control, name: 'type', defaultValue: initialValues.type }) || initialValues.type || 'DEPOSIT'
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">

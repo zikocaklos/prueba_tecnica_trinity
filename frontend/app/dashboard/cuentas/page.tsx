@@ -1,7 +1,7 @@
 "use client"
 
 import { useMemo, useState } from 'react'
-import { Search, Plus } from 'lucide-react'
+import { Plus } from 'lucide-react'
 import { Toaster, toast } from 'sonner'
 import { Account } from '../../../src/types/account'
 import { AccountFormValues } from '../../../src/schemas/account.schema'
@@ -13,6 +13,11 @@ import { AccountModal } from '../../../src/components/cuentas/AccountModal'
 import { AccountDetailsModal } from '../../../src/components/cuentas/AccountDetailsModal'
 import { AccountDeleteDialog } from '../../../src/components/cuentas/AccountDeleteDialog'
 import { Button } from '../../../src/components/ui/Button'
+import { PageHeader } from '../../../src/components/ui/PageHeader'
+import { Section } from '../../../src/components/ui/Section'
+import { SearchBar } from '../../../src/components/ui/SearchBar'
+import { LoadingSpinner } from '../../../src/components/ui/LoadingSpinner'
+import { EmptyState } from '../../../src/components/ui/EmptyState'
 
 const typeFilterOptions = ['ALL', 'SAVINGS', 'CHECKING'] as const
 const statusFilterOptions = ['ALL', 'ACTIVE', 'INACTIVE', 'CANCELLED'] as const
@@ -81,7 +86,7 @@ export default function DashboardAccountsPage() {
       } else {
         await create({
           accountNumber: data.accountNumber!,
-          client: { id: Number(data.clientId) },
+          clientId: Number(data.clientId),
           accountType: data.accountType,
           balance: data.balance,
           exemptGmf: data.exemptGmf,
@@ -109,120 +114,94 @@ export default function DashboardAccountsPage() {
   }
 
   return (
-    <main className="space-y-8 px-4 py-8 sm:px-6 lg:px-10">
+    <main className="space-y-8">
       <Toaster position="top-right" />
 
-      <section className="rounded-[32px] border border-slate-200 bg-white p-8 shadow-sm">
-        <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-          <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.3em] text-sky-500">Gestión de Cuentas</p>
-            <h1 className="mt-3 text-3xl font-semibold text-slate-950">Administra cuentas de ahorro y cuentas corrientes asociadas a clientes</h1>
-          </div>
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-            <Button onClick={openCreate}>
-              <Plus className="h-4 w-4" />
-              Nueva Cuenta
-            </Button>
-          </div>
-        </div>
-      </section>
+      <PageHeader
+        eyebrow="Gestión de cuentas"
+        title="Cuentas"
+        description="Administra las cuentas de ahorro y corrientes vinculadas a clientes con una experiencia clara y profesional."
+        actions={<Button onClick={openCreate}><Plus className="h-4 w-4" />Nueva cuenta</Button>}
+      />
 
-      <section className="grid gap-4 lg:grid-cols-[1fr_auto]">
-        <div className="relative">
-          <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Buscar por número de cuenta, cliente o tipo"
-            className="w-full rounded-2xl border border-slate-200 bg-slate-50 py-3 pl-12 pr-4 text-sm text-slate-900 outline-none focus:border-sky-500 focus:bg-white"
-            aria-label="Buscar cuentas"
-          />
-        </div>
-        <div className="grid gap-3 sm:grid-cols-2">
-          <div className="grid gap-2">
-            <label className="text-sm font-medium text-slate-700">Filtrar por tipo</label>
-            <select
-              value={typeFilter}
-              onChange={(e) => setTypeFilter(e.target.value as typeof typeFilterOptions[number])}
-              className="rounded-2xl border border-slate-200 bg-white py-3 px-4 text-sm outline-none focus:border-sky-500"
-              aria-label="Filtrar por tipo de cuenta"
-            >
-              {typeFilterOptions.map((option) => (
-                <option key={option} value={option}>{option === 'ALL' ? 'Todos los tipos' : option}</option>
-              ))}
-            </select>
-          </div>
-          <div className="grid gap-2">
-            <label className="text-sm font-medium text-slate-700">Filtrar por estado</label>
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value as typeof statusFilterOptions[number])}
-              className="rounded-2xl border border-slate-200 bg-white py-3 px-4 text-sm outline-none focus:border-sky-500"
-              aria-label="Filtrar por estado"
-            >
-              {statusFilterOptions.map((option) => (
-                <option key={option} value={option}>{option === 'ALL' ? 'Todos los estados' : option}</option>
-              ))}
-            </select>
-          </div>
-        </div>
-      </section>
-
-      <section className="grid gap-4 lg:grid-cols-[1fr_280px]">
-        <div className="space-y-4">
-          <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-            <label className="block text-sm font-medium text-slate-700">Filtrar por cliente</label>
-            <input
-              type="text"
-              value={clientFilter}
-              onChange={(e) => setClientFilter(e.target.value)}
-              placeholder="Nombre o identificación del cliente"
-              className="mt-3 w-full rounded-2xl border border-slate-200 bg-slate-50 py-3 px-4 text-sm text-slate-900 outline-none focus:border-sky-500 focus:bg-white"
-              aria-label="Filtrar por cliente"
+      <Section title="Consulta y filtros" description="Filtra cuentas por tipo, estado o cliente para operar de forma ágil y ordenada.">
+        <div className="grid gap-4 xl:grid-cols-[1.3fr_0.7fr]">
+          <div className="grid gap-4 md:grid-cols-2">
+            <SearchBar
+              value={searchQuery}
+              onChange={setSearchQuery}
+              placeholder="Buscar por número, cliente o tipo"
+              ariaLabel="Buscar cuentas"
             />
-          </div>
-          <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-            <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-500">Clientes disponibles</p>
-            <div className="mt-4 space-y-3 text-sm text-slate-700">
-              {clients.slice(0, 4).map((client) => (
-                <div key={client.id} className="rounded-2xl border border-slate-100 bg-slate-50 p-3">
-                  <p className="font-medium text-slate-900">{client.firstName} {client.lastName}</p>
-                  <p className="text-slate-600">{client.identificationNumber}</p>
-                </div>
-              ))}
-              {clients.length === 0 && <p className="text-slate-500">Cargando clientes...</p>}
+            <div className="grid gap-3">
+              <div className="rounded-[24px] border border-slate-200 bg-slate-50 p-4">
+                <label className="text-sm font-medium text-slate-700">Filtrar por tipo</label>
+                <select
+                  value={typeFilter}
+                  onChange={(e) => setTypeFilter(e.target.value as typeof typeFilterOptions[number])}
+                  className="mt-3 w-full rounded-[20px] border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none focus:border-[#1D4ED8] focus:ring-2 focus:ring-sky-100"
+                  aria-label="Filtrar por tipo de cuenta"
+                >
+                  {typeFilterOptions.map((option) => (
+                    <option key={option} value={option}>{option === 'ALL' ? 'Todos los tipos' : option}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="rounded-[24px] border border-slate-200 bg-slate-50 p-4">
+                <label className="text-sm font-medium text-slate-700">Filtrar por estado</label>
+                <select
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value as typeof statusFilterOptions[number])}
+                  className="mt-3 w-full rounded-[20px] border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none focus:border-[#1D4ED8] focus:ring-2 focus:ring-sky-100"
+                  aria-label="Filtrar por estado"
+                >
+                  {statusFilterOptions.map((option) => (
+                    <option key={option} value={option}>{option === 'ALL' ? 'Todos los estados' : option}</option>
+                  ))}
+                </select>
+              </div>
             </div>
           </div>
-        </div>
-        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-          <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-500">Resumen</p>
-          <div className="mt-4 space-y-3 text-sm text-slate-700">
-            <div className="flex items-center justify-between gap-2">
-              <span>Total cuentas</span>
-              <span className="font-semibold text-slate-900">{accounts.length}</span>
-            </div>
-            <div className="flex items-center justify-between gap-2">
-              <span>Cuentas activas</span>
-              <span className="font-semibold text-slate-900">{accounts.filter((acc) => acc.status === 'ACTIVE').length}</span>
-            </div>
-            <div className="flex items-center justify-between gap-2">
-              <span>Cuentas canceladas</span>
-              <span className="font-semibold text-slate-900">{accounts.filter((acc) => acc.status === 'CANCELLED').length}</span>
-            </div>
-          </div>
-        </div>
-      </section>
 
-      <section>
-        <AccountTable
-          data={filteredAccounts}
-          loading={isLoading}
-          onView={openDetails}
-          onEdit={openEdit}
-          onDelete={openDelete}
-        />
-      </section>
+          <div className="rounded-[24px] border border-slate-200 bg-slate-50 p-6">
+            <p className="text-sm font-semibold uppercase tracking-[0.28em] text-slate-500">Resumen</p>
+            <div className="mt-4 space-y-3 text-sm text-slate-700">
+              <div className="flex items-center justify-between gap-2">
+                <span>Total cuentas</span>
+                <span className="font-semibold text-[#1E3A8A]">{accounts.length}</span>
+              </div>
+              <div className="flex items-center justify-between gap-2">
+                <span>Cuentas activas</span>
+                <span className="font-semibold text-[#1E3A8A]">{accounts.filter((acc) => acc.status === 'ACTIVE').length}</span>
+              </div>
+              <div className="flex items-center justify-between gap-2">
+                <span>Cuentas canceladas</span>
+                <span className="font-semibold text-[#1E3A8A]">{accounts.filter((acc) => acc.status === 'CANCELLED').length}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-6">
+          {isLoading ? (
+            <LoadingSpinner />
+          ) : filteredAccounts.length === 0 ? (
+            <EmptyState
+              title="No se encontraron cuentas"
+              description="Prueba con otros filtros o crea una nueva cuenta para comenzar."
+              action={<Button onClick={openCreate}>Crear cuenta</Button>}
+            />
+          ) : (
+            <AccountTable
+              data={filteredAccounts}
+              loading={false}
+              onView={openDetails}
+              onEdit={openEdit}
+              onDelete={openDelete}
+            />
+          )}
+        </div>
+      </Section>
 
       <AccountModal open={isFormOpen} onClose={() => setIsFormOpen(false)} title={formMode === 'edit' ? 'Editar cuenta' : 'Nueva cuenta'}>
         <AccountForm
@@ -253,7 +232,7 @@ export default function DashboardAccountsPage() {
       <AccountDeleteDialog open={isDeleteOpen} onCancel={() => setIsDeleteOpen(false)} onConfirm={handleDelete} />
 
       {error && (
-        <div className="rounded-3xl border border-red-200 bg-red-50 p-5 text-sm text-red-700">
+        <div className="rounded-[32px] border border-red-200 bg-red-50 p-5 text-sm text-red-700">
           Ocurrió un error al cargar las cuentas. Por favor recarga la página.
         </div>
       )}

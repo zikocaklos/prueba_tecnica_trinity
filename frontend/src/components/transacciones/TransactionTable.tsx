@@ -42,42 +42,36 @@ export function TransactionTable({ data, loading, onView }: Props) {
   }
 
   return (
-    <div className="overflow-x-auto rounded-3xl border border-slate-200 bg-white shadow-sm">
-      <table className="min-w-full divide-y divide-slate-200">
-        <thead className="bg-slate-50">
-          <tr>
-            <th className="px-4 py-4 text-left text-sm font-semibold uppercase tracking-[0.24em] text-slate-500">ID</th>
-            <th className="px-4 py-4 text-left text-sm font-semibold uppercase tracking-[0.24em] text-slate-500">Tipo</th>
-            <th className="px-4 py-4 text-right text-sm font-semibold uppercase tracking-[0.24em] text-slate-500">Monto</th>
-            <th className="px-4 py-4 text-left text-sm font-semibold uppercase tracking-[0.24em] text-slate-500">Fecha</th>
-            <th className="px-4 py-4 text-left text-sm font-semibold uppercase tracking-[0.24em] text-slate-500">Cuenta Origen</th>
-            <th className="px-4 py-4 text-left text-sm font-semibold uppercase tracking-[0.24em] text-slate-500">Cuenta Destino</th>
-            <th className="px-4 py-4 text-right text-sm font-semibold uppercase tracking-[0.24em] text-slate-500">Acciones</th>
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-slate-200 bg-white">
-          {data.map((transaction) => (
-            <tr key={transaction.id} className="hover:bg-slate-50">
-              <td className="px-4 py-4 text-sm text-slate-700">{transaction.id}</td>
-              <td className="px-4 py-4 text-sm text-slate-700"><TransactionTypeBadge type={transaction.type} /></td>
-              <td className="px-4 py-4 text-right text-sm font-semibold text-slate-900">${transaction.amount.toFixed(2)}</td>
-              <td className="px-4 py-4 text-sm text-slate-700">{new Date(transaction.transactionDate).toLocaleString('es-ES')}</td>
-              <td className="px-4 py-4 text-sm text-slate-700">{transaction.sourceAccount?.accountNumber ?? 'N/A'}</td>
-              <td className="px-4 py-4 text-sm text-slate-700">{transaction.destinationAccount?.accountNumber ?? 'N/A'}</td>
-              <td className="px-4 py-4 text-right text-sm text-slate-700">
-                <button
-                  type="button"
-                  className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 transition hover:border-slate-300 hover:text-slate-900"
-                  aria-label="Ver detalle"
-                  onClick={() => onView(transaction)}
-                >
-                  <Eye className="h-4 w-4" />
-                </button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+    <div className="overflow-hidden rounded-[32px] border border-slate-200 bg-white shadow-sm">
+      <div className="grid gap-2 bg-slate-50 p-4 text-sm font-semibold uppercase tracking-[0.24em] text-slate-500 sm:grid-cols-[70px_120px_1fr_1.2fr_1.2fr_120px]">
+        <span>ID</span>
+        <span>Tipo</span>
+        <span className="text-right">Monto</span>
+        <span>Fecha</span>
+        <span>Cuenta Origen / Destino</span>
+        <span className="text-right">Acciones</span>
+      </div>
+      <div className="space-y-3 p-4">
+        {data.map((transaction) => (
+          <div key={transaction.id} className="grid gap-2 rounded-[26px] border border-slate-200 bg-white p-4 text-sm text-slate-700 shadow-sm transition hover:border-slate-300 hover:shadow-md sm:grid-cols-[70px_120px_1fr_1.2fr_1.2fr_120px] sm:items-center">
+            <span className="font-medium text-slate-900">{transaction.id}</span>
+            <span><TransactionTypeBadge type={transaction.type} /></span>
+            <span className="text-right font-semibold text-slate-950">${transaction.amount.toFixed(2)}</span>
+            <span>{new Date(transaction.transactionDate).toLocaleString('es-ES')}</span>
+            <span>{transaction.sourceAccount?.accountNumber ?? '—'} → {transaction.destinationAccount?.accountNumber ?? '—'}</span>
+            <div className="flex items-center justify-end gap-2">
+              <button
+                type="button"
+                className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-slate-50 text-slate-700 transition hover:border-slate-300 hover:bg-slate-100"
+                aria-label="Ver detalle"
+                onClick={() => onView(transaction)}
+              >
+                <Eye className="h-4 w-4" />
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   )
 }

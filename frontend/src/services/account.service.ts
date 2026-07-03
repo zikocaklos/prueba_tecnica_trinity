@@ -3,7 +3,7 @@ import { Account } from '../types/account'
 import { AccountStatus, AccountType } from '../schemas/account.schema'
 
 export type AccountCreatePayload = {
-  client: { id: number }
+  clientId: number
   accountType: AccountType
   accountNumber?: string
   balance: number

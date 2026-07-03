@@ -1,60 +1,124 @@
-import { ArrowLeftRight, Landmark, Users } from 'lucide-react'
-import { DashboardHero } from '../../src/components/dashboard/DashboardHero'
-import { StatCard } from '../../src/components/dashboard/StatCard'
-import { ModuleCard } from '../../src/components/dashboard/ModuleCard'
+"use client";
 
-const stats = [
-  { title: 'Clientes registrados', value: '125', icon: Users, accentClass: 'bg-sky-100 text-sky-700' },
-  { title: 'Cuentas activas', value: '340', icon: Landmark, accentClass: 'bg-emerald-100 text-emerald-700' },
-  { title: 'Transacciones realizadas', value: '1,520', icon: ArrowLeftRight, accentClass: 'bg-violet-100 text-violet-700' },
-]
+import { ArrowLeftRight, Landmark, Users } from "lucide-react";
 
-const modules = [
+import { useAccounts } from "../../src/hooks/useAccounts";
+import { useClients } from "../../src/hooks/useClients";
+import { useTransactions } from "../../src/hooks/useTransactions";
+
+import { DashboardHero } from "../../src/components/dashboard/DashboardHero";
+import { StatCard } from "../../src/components/dashboard/StatCard";
+import { ModuleCard } from "../../src/components/dashboard/ModuleCard";
+import { Card } from "../../src/components/ui/Card";
+
+// ESTOS LOS CREAREMOS EN EL SIGUIENTE PASO
+import { ActivityCard } from "../../src/components/dashboard/ActivityCard";
+import { QuickActions } from "../../src/components/dashboard/QuickActions";
+import { RecentClients } from "../../src/components/dashboard/RecentClients";
+
+const moduleLinks = [
   {
-    title: 'Clientes',
-    description: 'Administración completa de clientes, creación, edición, consulta y eliminación.',
-    href: '/dashboard/clientes',
+    title: "Clientes",
+    description: "Administra toda la información de los clientes.",
+    href: "/dashboard/clientes",
     icon: Users,
   },
   {
-    title: 'Cuentas',
-    description: 'Gestión de cuentas de ahorro y cuentas corrientes asociadas a clientes.',
-    href: '/dashboard/cuentas',
+    title: "Productos",
+    description: "Gestiona cuentas de ahorro y corrientes.",
+    href: "/dashboard/cuentas",
     icon: Landmark,
   },
   {
-    title: 'Transacciones',
-    description: 'Registro de consignaciones, retiros y transferencias entre cuentas.',
-    href: '/dashboard/transacciones',
+    title: "Transacciones",
+    description: "Controla retiros, consignaciones y transferencias.",
+    href: "/dashboard/transacciones",
     icon: ArrowLeftRight,
   },
-]
+];
 
 export default function DashboardPage() {
+  const { clients = [], isLoading: clientsLoading } = useClients();
+
+  const { accounts = [], isLoading: accountsLoading } = useAccounts();
+
+  const { transactions = [], isLoading: transactionsLoading } =
+    useTransactions();
+
+  const loading =
+    clientsLoading ||
+    accountsLoading ||
+    transactionsLoading;
+
+  const stats = [
+    {
+      title: "Clientes",
+      value: loading ? "..." : String(clients.length),
+      subtitle: "Clientes registrados",
+      icon: Users,
+      accentClass: "bg-blue-100 text-blue-600",
+    },
+    {
+      title: "Productos",
+      value: loading ? "..." : String(accounts.length),
+      subtitle: "Cuentas activas",
+      icon: Landmark,
+      accentClass: "bg-emerald-100 text-emerald-600",
+    },
+    {
+      title: "Transacciones",
+      value: loading ? "..." : String(transactions.length),
+      subtitle: "Operaciones realizadas",
+      icon: ArrowLeftRight,
+      accentClass: "bg-violet-100 text-violet-600",
+    },
+  ];
+
   return (
-    <main className="space-y-8 px-4 py-8 sm:px-6 lg:px-10">
+    <main className="space-y-8">
+
       <DashboardHero />
 
-      <section className="grid gap-4 md:grid-cols-3">
+      <section className="grid gap-6 lg:grid-cols-3">
         {stats.map((stat) => (
-          <StatCard key={stat.title} title={stat.title} value={stat.value} icon={stat.icon} accentClass={stat.accentClass} />
+          <StatCard
+            key={stat.title}
+            title={stat.title}
+            value={stat.value}
+            subtitle={stat.subtitle}
+            icon={stat.icon}
+            accentClass={stat.accentClass}
+          />
         ))}
       </section>
 
-      <section>
-        <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-500">Módulos</p>
-            <h2 className="mt-2 text-3xl font-semibold text-slate-900">Navegación rápida</h2>
-          </div>
-        </div>
+      <section className="grid gap-6 xl:grid-cols-[2fr_1fr]">
 
-        <div className="grid gap-5 lg:grid-cols-3">
-          {modules.map((module) => (
-            <ModuleCard key={module.title} title={module.title} description={module.description} href={module.href} icon={module.icon} />
+        <ActivityCard />
+
+        <QuickActions />
+
+      </section>
+
+      <Card
+        title="Módulos principales"
+        description="Accede rápidamente a cada módulo del sistema."
+      >
+        <div className="grid gap-6 md:grid-cols-3">
+          {moduleLinks.map((module) => (
+            <ModuleCard
+              key={module.title}
+              title={module.title}
+              description={module.description}
+              href={module.href}
+              icon={module.icon}
+            />
           ))}
         </div>
-      </section>
+      </Card>
+
+      <RecentClients clients={clients.slice(0, 5)} />
+
     </main>
-  )
+  );
 }

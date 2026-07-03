@@ -2,12 +2,16 @@ package com.banco.infrastructure.input.controller;
 
 import com.banco.domain.model.Client;
 import com.banco.domain.ports.in.ClientServicePort;
+import com.banco.infrastructure.input.dto.ClientRequest;
+import com.banco.infrastructure.input.dto.ClientResponse;
+import com.banco.infrastructure.mapping.ClientMapper;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/clients")
@@ -20,27 +24,30 @@ public class ClientController {
     }
 
     @PostMapping
-    public ResponseEntity<Client> createClient(@RequestBody @Valid Client client) {
-        Client created = clientService.create(client);
-        return ResponseEntity.status(HttpStatus.CREATED).body(created);
+    public ResponseEntity<ClientResponse> createClient(@RequestBody @Valid ClientRequest clientRequest) {
+        Client created = clientService.create(ClientMapper.toDomain(clientRequest));
+        return ResponseEntity.status(HttpStatus.CREATED).body(ClientMapper.toResponse(created));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Client> updateClient(
+    public ResponseEntity<ClientResponse> updateClient(
             @PathVariable Long id,
-            @RequestBody @Valid Client client) {
-        Client updated = clientService.update(id, client);
-        return ResponseEntity.ok(updated);
+            @RequestBody @Valid ClientRequest clientRequest) {
+        Client updated = clientService.update(id, ClientMapper.toDomain(clientRequest));
+        return ResponseEntity.ok(ClientMapper.toResponse(updated));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Client> getClient(@PathVariable Long id) {
-        return ResponseEntity.ok(clientService.findById(id));
+    public ResponseEntity<ClientResponse> getClient(@PathVariable Long id) {
+        return ResponseEntity.ok(ClientMapper.toResponse(clientService.findById(id)));
     }
 
     @GetMapping
-    public ResponseEntity<List<Client>> getAllClients() {
-        return ResponseEntity.ok(clientService.findAll());
+    public ResponseEntity<List<ClientResponse>> getAllClients() {
+        List<ClientResponse> response = clientService.findAll().stream()
+                .map(ClientMapper::toResponse)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/{id}")

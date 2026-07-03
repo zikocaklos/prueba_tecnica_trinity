@@ -1,7 +1,7 @@
 "use client"
 
 import { useMemo, useState } from 'react'
-import { Search } from 'lucide-react'
+import { Plus } from 'lucide-react'
 import { Toaster, toast } from 'sonner'
 import { Client } from '../../../src/types/client'
 import { ClientFormValues } from '../../../src/schemas/client.schema'
@@ -12,6 +12,11 @@ import { ClientModal } from '../../../src/components/clientes/ClientModal'
 import { ClientDetailsModal } from '../../../src/components/clientes/ClientDetailsModal'
 import { ClientDeleteDialog } from '../../../src/components/clientes/ClientDeleteDialog'
 import { Button } from '../../../src/components/ui/Button'
+import { PageHeader } from '../../../src/components/ui/PageHeader'
+import { Section } from '../../../src/components/ui/Section'
+import { SearchBar } from '../../../src/components/ui/SearchBar'
+import { LoadingSpinner } from '../../../src/components/ui/LoadingSpinner'
+import { EmptyState } from '../../../src/components/ui/EmptyState'
 
 export default function DashboardClientsPage() {
   const { clients = [], isLoading, error, refresh, create, update, remove } = useClients()
@@ -84,41 +89,50 @@ export default function DashboardClientsPage() {
   }
 
   return (
-    <main className="space-y-8 px-4 py-8 sm:px-6 lg:px-10">
+    <main className="space-y-8">
       <Toaster position="top-right" />
 
-      <section className="rounded-[32px] border border-slate-200 bg-white p-8 shadow-sm">
-        <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-          <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.3em] text-sky-500">Gestión de Clientes</p>
-            <h1 className="mt-3 text-3xl font-semibold text-slate-950">Administra los clientes registrados en la entidad financiera</h1>
-            <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-600">Visualiza, edita y elimina clientes con seguridad y trazabilidad. Todas las operaciones se sincronizan con el backend real.</p>
-          </div>
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-            <div className="relative w-full sm:w-96">
-              <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-              <input
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Buscar por nombre, apellido o número"
-                className="w-full rounded-2xl border border-slate-200 bg-slate-50 py-3 pl-12 pr-4 text-sm text-slate-900 outline-none transition focus:border-sky-500 focus:bg-white"
-                aria-label="Buscar clientes"
-              />
-            </div>
-            <Button onClick={openCreate}>Nuevo cliente</Button>
+      <PageHeader
+        eyebrow="Gestión de clientes"
+        title="Clientes"
+        description="Administra los clientes registrados en la entidad financiera desde un panel seguro y profesional."
+        actions={<Button onClick={openCreate}><Plus className="h-4 w-4" />Nuevo cliente</Button>}
+      />
+
+      <Section title="Operaciones y consulta" description="Consulta, filtra y gestiona clientes con una experiencia uniforme en todo el sistema.">
+        <div className="grid gap-4 lg:grid-cols-[1.2fr_0.8fr] lg:items-end">
+          <SearchBar
+            value={searchQuery}
+            onChange={setSearchQuery}
+            placeholder="Buscar por nombre, apellido o identificación"
+            ariaLabel="Buscar clientes"
+          />
+          <div className="rounded-[24px] border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
+            <p className="font-semibold text-slate-950">Clientes totales</p>
+            <p className="mt-2 text-3xl font-semibold text-[#1E3A8A]">{clients.length}</p>
           </div>
         </div>
-      </section>
 
-      <section className="space-y-6">
-        <ClientTable
-          data={filteredClients}
-          loading={isLoading}
-          onView={openDetails}
-          onEdit={openEdit}
-          onDelete={openDelete}
-        />
-      </section>
+        <div className="mt-6">
+          {isLoading ? (
+            <LoadingSpinner />
+          ) : filteredClients.length === 0 ? (
+            <EmptyState
+              title="No se encontraron clientes"
+              description="Ajusta la búsqueda o registra un nuevo cliente para comenzar."
+              action={<Button onClick={openCreate}>Crear cliente</Button>}
+            />
+          ) : (
+            <ClientTable
+              data={filteredClients}
+              loading={false}
+              onView={openDetails}
+              onEdit={openEdit}
+              onDelete={openDelete}
+            />
+          )}
+        </div>
+      </Section>
 
       <ClientModal
         open={isFormOpen}
@@ -152,7 +166,7 @@ export default function DashboardClientsPage() {
       />
 
       {error && (
-        <div className="rounded-3xl border border-red-200 bg-red-50 p-5 text-sm text-red-700">
+        <div className="rounded-[32px] border border-red-200 bg-red-50 p-5 text-sm text-red-700">
           Ocurrió un error al cargar los clientes. Por favor recarga la página o revisa la conexión con la API.
         </div>
       )}

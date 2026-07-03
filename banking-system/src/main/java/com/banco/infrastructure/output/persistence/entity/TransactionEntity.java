@@ -1,7 +1,6 @@
 package com.banco.infrastructure.output.persistence.entity;
 
 import com.banco.domain.enums.TransactionType;
-import com.banco.domain.model.Transaction;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -37,28 +36,4 @@ public class TransactionEntity {
     private AccountEntity destinationAccount;
 
     private Boolean deleted;
-
-    public Transaction toModel() {
-        return Transaction.builder()
-                .id(id)
-                .type(type)
-                .amount(amount)
-                .transactionDate(transactionDate)
-                .sourceAccount(sourceAccount != null ? sourceAccount.toModel() : null)
-                .destinationAccount(destinationAccount != null ? destinationAccount.toModel() : null)
-                .deleted(deleted != null ? deleted : false)
-                .build();
-    }
-
-    public static TransactionEntity fromModel(Transaction t) {
-        return TransactionEntity.builder()
-                .id(t.getId())
-                .type(t.getType())
-                .amount(t.getAmount())
-                .transactionDate(t.getTransactionDate())
-                .sourceAccount(t.getSourceAccount() != null ? AccountEntity.fromModel(t.getSourceAccount()) : null)
-                .destinationAccount(t.getDestinationAccount() != null ? AccountEntity.fromModel(t.getDestinationAccount()) : null)
-                .deleted(t.getDeleted())
-                .build();
-    }
 }

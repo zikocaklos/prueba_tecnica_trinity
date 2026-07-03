@@ -1,6 +1,5 @@
 package com.banco.infrastructure.output.persistence.entity;
 
-import com.banco.domain.model.Client;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -44,33 +43,4 @@ public class ClientEntity {
 
     private Boolean deleted;
 
-    public Client toModel() {
-        return Client.builder()
-                .id(id)
-                .identificationType(identificationType)
-                .identificationNumber(identificationNumber)
-                .firstName(firstName)
-                .lastName(lastName)
-                .email(email)
-                .birthDate(birthDate)
-                .createdAt(createdAt)
-                .updatedAt(updatedAt)
-                .deleted(deleted != null ? deleted : false)
-                .build();
-    }
-
-    public static ClientEntity fromModel(Client client) {
-        return ClientEntity.builder()
-                .id(client.getId())
-                .identificationType(client.getIdentificationType())
-                .identificationNumber(client.getIdentificationNumber())
-                .firstName(client.getFirstName())
-                .lastName(client.getLastName())
-                .email(client.getEmail())
-                .birthDate(client.getBirthDate())
-                .createdAt(client.getCreatedAt())
-                .updatedAt(client.getUpdatedAt())
-                .deleted(client.getDeleted())
-                .build();
-    }
 }

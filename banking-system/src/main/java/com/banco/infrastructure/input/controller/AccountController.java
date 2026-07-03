@@ -2,12 +2,16 @@ package com.banco.infrastructure.input.controller;
 
 import com.banco.domain.model.Account;
 import com.banco.domain.ports.in.AccountServicePort;
+import com.banco.infrastructure.input.dto.AccountRequest;
+import com.banco.infrastructure.input.dto.AccountResponse;
+import com.banco.infrastructure.mapping.AccountMapper;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/accounts")
@@ -20,25 +24,28 @@ public class AccountController {
     }
 
     @PostMapping
-    public ResponseEntity<Account> createAccount(@RequestBody @Valid Account account) {
-        Account created = accountService.create(account);
-        return ResponseEntity.status(HttpStatus.CREATED).body(created);
+    public ResponseEntity<AccountResponse> createAccount(@RequestBody @Valid AccountRequest accountRequest) {
+        Account created = accountService.create(AccountMapper.toDomain(accountRequest));
+        return ResponseEntity.status(HttpStatus.CREATED).body(AccountMapper.toResponse(created));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Account> updateAccount(@PathVariable Long id, @RequestBody @Valid Account account) {
-        Account updated = accountService.update(id, account);
-        return ResponseEntity.ok(updated);
+    public ResponseEntity<AccountResponse> updateAccount(@PathVariable Long id, @RequestBody @Valid AccountRequest accountRequest) {
+        Account updated = accountService.update(id, AccountMapper.toDomain(accountRequest));
+        return ResponseEntity.ok(AccountMapper.toResponse(updated));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Account> getAccount(@PathVariable Long id) {
-        return ResponseEntity.ok(accountService.findById(id));
+    public ResponseEntity<AccountResponse> getAccount(@PathVariable Long id) {
+        return ResponseEntity.ok(AccountMapper.toResponse(accountService.findById(id)));
     }
 
     @GetMapping
-    public ResponseEntity<List<Account>> getAllAccounts() {
-        return ResponseEntity.ok(accountService.findAll());
+    public ResponseEntity<List<AccountResponse>> getAllAccounts() {
+        List<AccountResponse> response = accountService.findAll().stream()
+                .map(AccountMapper::toResponse)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/{id}")

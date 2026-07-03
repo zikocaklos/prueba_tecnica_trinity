@@ -45,60 +45,53 @@ export function ClientTable({ data, loading, onView, onEdit, onDelete }: Props) 
   }
 
   return (
-    <div className="overflow-x-auto rounded-3xl border border-slate-200 bg-white shadow-sm">
-      <table className="min-w-full divide-y divide-slate-200">
-        <thead className="bg-slate-50">
-          <tr>
-            <th className="px-4 py-4 text-left text-sm font-semibold uppercase tracking-[0.24em] text-slate-500">Tipo Identificación</th>
-            <th className="px-4 py-4 text-left text-sm font-semibold uppercase tracking-[0.24em] text-slate-500">Número Identificación</th>
-            <th className="px-4 py-4 text-left text-sm font-semibold uppercase tracking-[0.24em] text-slate-500">Nombre Completo</th>
-            <th className="px-4 py-4 text-left text-sm font-semibold uppercase tracking-[0.24em] text-slate-500">Correo Electrónico</th>
-            <th className="px-4 py-4 text-left text-sm font-semibold uppercase tracking-[0.24em] text-slate-500">Fecha Nacimiento</th>
-            <th className="px-4 py-4 text-left text-sm font-semibold uppercase tracking-[0.24em] text-slate-500">Fecha Creación</th>
-            <th className="px-4 py-4 text-right text-sm font-semibold uppercase tracking-[0.24em] text-slate-500">Acciones</th>
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-slate-200 bg-white">
-          {data.map((client) => (
-            <tr key={client.id} className="hover:bg-slate-50">
-              <td className="px-4 py-4 text-sm text-slate-700">{client.identificationType}</td>
-              <td className="px-4 py-4 text-sm text-slate-700">{client.identificationNumber}</td>
-              <td className="px-4 py-4 text-sm text-slate-700">{`${client.firstName} ${client.lastName}`}</td>
-              <td className="px-4 py-4 text-sm text-slate-700">{client.email}</td>
-              <td className="px-4 py-4 text-sm text-slate-700">{new Date(client.birthDate).toLocaleDateString('es-ES')}</td>
-              <td className="px-4 py-4 text-sm text-slate-700">{new Date(client.createdAt).toLocaleDateString('es-ES')}</td>
-              <td className="px-4 py-4 text-right text-sm text-slate-700">
-                <div className="inline-flex items-center gap-2">
-                  <button
-                    type="button"
-                    className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 transition hover:border-slate-300 hover:text-slate-900"
-                    aria-label="Ver detalles"
-                    onClick={() => onView(client)}
-                  >
-                    <Eye className="h-4 w-4" />
-                  </button>
-                  <button
-                    type="button"
-                    className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 transition hover:border-slate-300 hover:text-slate-900"
-                    aria-label="Editar cliente"
-                    onClick={() => onEdit(client)}
-                  >
-                    <Edit3 className="h-4 w-4" />
-                  </button>
-                  <button
-                    type="button"
-                    className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-red-600 transition hover:border-red-300 hover:text-red-800"
-                    aria-label="Eliminar cliente"
-                    onClick={() => onDelete(client)}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </button>
-                </div>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+    <div className="overflow-hidden rounded-[32px] border border-slate-200 bg-white shadow-sm">
+      <div className="grid gap-2 bg-slate-50 p-4 text-sm font-semibold uppercase tracking-[0.24em] text-slate-500 sm:grid-cols-[220px_220px_1fr_1fr_1fr_1fr]">
+        <span>Tipo Identificación</span>
+        <span>Número Identificación</span>
+        <span>Nombre Completo</span>
+        <span>Correo</span>
+        <span>Fecha Nacimiento</span>
+        <span className="text-right">Acciones</span>
+      </div>
+      <div className="space-y-3 p-4">
+        {data.map((client) => (
+          <div key={client.id} className="grid gap-2 rounded-[26px] border border-slate-200 bg-white p-4 text-sm text-slate-700 shadow-sm transition hover:border-slate-300 hover:shadow-md sm:grid-cols-[220px_220px_1fr_1fr_1fr] sm:items-center">
+            <span className="font-medium text-slate-900">{client.identificationType}</span>
+            <span>{client.identificationNumber}</span>
+            <span>{`${client.firstName} ${client.lastName}`}</span>
+            <span>{client.email}</span>
+            <span>{new Date(client.birthDate).toLocaleDateString('es-ES')}</span>
+            <div className="mt-4 flex items-center justify-between gap-2 sm:mt-0 sm:justify-end">
+              <button
+                type="button"
+                className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-slate-50 text-slate-700 transition hover:border-slate-300 hover:bg-slate-100"
+                aria-label="Ver detalles"
+                onClick={() => onView(client)}
+              >
+                <Eye className="h-4 w-4" />
+              </button>
+              <button
+                type="button"
+                className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-slate-50 text-[#1D4ED8] transition hover:border-[#1D4ED8] hover:bg-sky-50"
+                aria-label="Editar cliente"
+                onClick={() => onEdit(client)}
+              >
+                <Edit3 className="h-4 w-4" />
+              </button>
+              <button
+                type="button"
+                className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-red-200 bg-red-50 text-red-600 transition hover:border-red-300 hover:bg-red-100"
+                aria-label="Eliminar cliente"
+                onClick={() => onDelete(client)}
+              >
+                <Trash2 className="h-4 w-4" />
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   )
 }
+        

@@ -2,6 +2,7 @@ package com.banco.infrastructure.output.persistence.adapter;
 
 import com.banco.domain.model.Client;
 import com.banco.domain.ports.out.ClientRepositoryPort;
+import com.banco.infrastructure.mapping.ClientMapper;
 import com.banco.infrastructure.output.persistence.entity.ClientEntity;
 import com.banco.infrastructure.output.persistence.repository.SpringClientRepository;
 import org.springframework.stereotype.Component;
@@ -23,7 +24,7 @@ public class ClientRepositoryAdapter implements ClientRepositoryPort {
     @Override
     public Client save(Client client) {
         LocalDateTime now = LocalDateTime.now();
-        ClientEntity entity = ClientEntity.fromModel(client);
+        ClientEntity entity = ClientMapper.toEntity(client);
 
         if (entity.getId() == null) {
             entity.setCreatedAt(now);
@@ -32,21 +33,21 @@ public class ClientRepositoryAdapter implements ClientRepositoryPort {
         }
 
         ClientEntity saved = clientRepository.save(entity);
-        return saved.toModel();
+        return ClientMapper.toDomain(saved);
     }
 
     @Override
     public Optional<Client> findById(Long id) {
         return clientRepository.findById(id)
                 .filter(entity -> entity.getDeleted() == null || !entity.getDeleted())
-                .map(ClientEntity::toModel);
+                .map(ClientMapper::toDomain);
     }
 
     @Override
     public List<Client> findAll() {
         return clientRepository.findAll().stream()
                 .filter(entity -> entity.getDeleted() == null || !entity.getDeleted())
-                .map(ClientEntity::toModel)
+                .map(ClientMapper::toDomain)
                 .collect(Collectors.toList());
     }
 
@@ -56,6 +57,6 @@ public class ClientRepositoryAdapter implements ClientRepositoryPort {
             throw new IllegalArgumentException("Client id is required for delete");
         }
         client.setDeleted(true);
-        clientRepository.save(ClientEntity.fromModel(client));
+        clientRepository.save(ClientMapper.toEntity(client));
     }
 }

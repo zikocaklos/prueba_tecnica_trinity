@@ -2,6 +2,7 @@ package com.banco.infrastructure.output.persistence.adapter;
 
 import com.banco.domain.model.Account;
 import com.banco.domain.ports.out.AccountRepositoryPort;
+import com.banco.infrastructure.mapping.AccountMapper;
 import com.banco.infrastructure.output.persistence.entity.AccountEntity;
 import com.banco.infrastructure.output.persistence.repository.SpringAccountRepository;
 import com.banco.infrastructure.output.persistence.repository.SpringClientRepository;
@@ -26,7 +27,7 @@ public class AccountRepositoryAdapter implements AccountRepositoryPort {
     @Override
     public Account save(Account account) {
         LocalDateTime now = LocalDateTime.now();
-        AccountEntity entity = AccountEntity.fromModel(account);
+        AccountEntity entity = AccountMapper.toEntity(account);
 
         if (entity.getClient() != null && entity.getClient().getId() != null) {
             entity.setClient(clientRepository.getReferenceById(entity.getClient().getId()));
@@ -39,21 +40,21 @@ public class AccountRepositoryAdapter implements AccountRepositoryPort {
         }
 
         AccountEntity saved = accountRepository.save(entity);
-        return saved.toModel();
+        return AccountMapper.toDomain(saved);
     }
 
     @Override
     public Optional<Account> findById(Long id) {
         return accountRepository.findById(id)
                 .filter(entity -> entity.getDeleted() == null || !entity.getDeleted())
-                .map(AccountEntity::toModel);
+                .map(AccountMapper::toDomain);
     }
 
     @Override
     public List<Account> findAll() {
         return accountRepository.findAll().stream()
                 .filter(entity -> entity.getDeleted() == null || !entity.getDeleted())
-                .map(AccountEntity::toModel)
+                .map(AccountMapper::toDomain)
                 .collect(Collectors.toList());
     }
 
@@ -63,6 +64,6 @@ public class AccountRepositoryAdapter implements AccountRepositoryPort {
             throw new IllegalArgumentException("Account id is required for delete");
         }
         account.setDeleted(true);
-        accountRepository.save(AccountEntity.fromModel(account));
+        accountRepository.save(AccountMapper.toEntity(account));
     }
 }

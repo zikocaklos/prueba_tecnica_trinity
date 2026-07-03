@@ -2,6 +2,17 @@ import { Account } from './account'
 
 export type TransactionType = 'DEPOSIT' | 'WITHDRAWAL' | 'TRANSFER'
 
+export interface AccountReference {
+  id: number
+}
+
+export interface TransactionRequest {
+  type: TransactionType
+  amount: number
+  sourceAccountId?: number
+  destinationAccountId?: number
+}
+
 export interface Transaction {
   id: number
   type: TransactionType
