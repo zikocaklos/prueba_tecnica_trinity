@@ -8,7 +8,6 @@ Aplicación bancaria full-stack compuesta por un backend en Spring Boot y un fro
 - Gestión de cuentas bancarias
 - Procesamiento de transacciones (depósitos, retiros y transferencias)
 - Estados de cuenta activos/inactivos
-- Soft delete para cuentas y otros registros
 - Interfaz moderna en Next.js con Tailwind CSS
 - Pruebas unitarias en el backend con JUnit y Mockito
 
@@ -45,13 +44,6 @@ Aplicación bancaria full-stack compuesta por un backend en Spring Boot y un fro
 
 ## Requisitos previos
 
-Para ejecutar el proyecto localmente necesitas:
-
-- Docker Desktop (recomendado para la ejecución completa)
-- Java 17 (si deseas ejecutar el backend sin Docker)
-- Node.js 22 (si deseas ejecutar el frontend sin Docker)
-- Maven
-
 ## Ejecución con Docker
 
 La forma más sencilla de levantar todo el proyecto es con Docker Compose:
@@ -76,23 +68,6 @@ docker compose logs
 docker compose down -v
 ```
 
-## Ejecución sin Docker
-
-### Backend
-
-```bash
-cd banking-system
-mvn spring-boot:run
-```
-
-### Frontend
-
-```bash
-cd frontend
-npm install
-npm run dev
-```
-
 ## Variables de entorno
 
 El backend usa un archivo de ejemplo en [banking-system/.env](banking-system/.env), y el frontend usa [frontend/.env.local](frontend/.env.local).
@@ -107,12 +82,6 @@ Para ejecutarlas:
 cd banking-system
 mvn test
 ```
-
-## Notas importantes
-
-- El proyecto mantiene la arquitectura existente sin modificar la lógica de negocio.
-- La configuración Docker está preparada para levantar backend, frontend y base de datos automáticamente.
-- En el flujo actual, las cuentas inactivas no pueden utilizarse para transacciones, y las cuentas eliminadas con soft delete no se muestran en la interfaz operativa.
 
 ## Licencia
 
