@@ -12,6 +12,9 @@ export type AccountCreatePayload = {
 }
 
 export type AccountUpdatePayload = {
+  accountNumber?: string
+  clientId?: number
+  accountType?: AccountType
   balance?: number
   exemptGmf?: boolean
   status?: AccountStatus

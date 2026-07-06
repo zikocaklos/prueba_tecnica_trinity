@@ -18,6 +18,7 @@ import { Section } from '../../../src/components/ui/Section'
 import { SearchBar } from '../../../src/components/ui/SearchBar'
 import { LoadingSpinner } from '../../../src/components/ui/LoadingSpinner'
 import { EmptyState } from '../../../src/components/ui/EmptyState'
+import { canDeleteAccount } from '../../../src/lib/account-utils'
 
 const typeFilterOptions = ['ALL', 'SAVINGS', 'CHECKING'] as const
 const statusFilterOptions = ['ALL', 'ACTIVE', 'INACTIVE', 'CANCELLED'] as const
@@ -26,14 +27,15 @@ export default function DashboardAccountsPage() {
   const { accounts = [], isLoading, error, refresh, create, update, remove } = useAccounts()
   const { clients = [] } = useClients()
   const [searchQuery, setSearchQuery] = useState('')
-  const [typeFilter, setTypeFilter] = useState<typeof typeFilterOptions[number]>('ALL')
-  const [statusFilter, setStatusFilter] = useState<typeof statusFilterOptions[number]>('ALL')
+  const [typeFilter, setTypeFilter] = useState<(typeof typeFilterOptions)[number]>('ALL')
+  const [statusFilter, setStatusFilter] = useState<(typeof statusFilterOptions)[number]>('ALL')
   const [clientFilter, setClientFilter] = useState('')
   const [isFormOpen, setIsFormOpen] = useState(false)
   const [isDetailsOpen, setIsDetailsOpen] = useState(false)
   const [isDeleteOpen, setIsDeleteOpen] = useState(false)
   const [activeAccount, setActiveAccount] = useState<Account | null>(null)
   const [formMode, setFormMode] = useState<'create' | 'edit'>('create')
+  const [submitting, setSubmitting] = useState(false)
 
   const filteredAccounts = useMemo(() => {
     const query = searchQuery.trim().toLowerCase()
@@ -52,6 +54,13 @@ export default function DashboardAccountsPage() {
     })
   }, [accounts, searchQuery, typeFilter, statusFilter, clientFilter])
 
+  const closeForms = () => {
+    setIsFormOpen(false)
+    setIsDetailsOpen(false)
+    setIsDeleteOpen(false)
+    setActiveAccount(null)
+  }
+
   const openCreate = () => {
     setFormMode('create')
     setActiveAccount(null)
@@ -59,6 +68,7 @@ export default function DashboardAccountsPage() {
   }
 
   const openEdit = (account: Account) => {
+    if (account.status === 'CANCELLED') return
     setFormMode('edit')
     setActiveAccount(account)
     setIsFormOpen(true)
@@ -70,14 +80,30 @@ export default function DashboardAccountsPage() {
   }
 
   const openDelete = (account: Account) => {
+    if (account.balance > 0) {
+      toast.error('No es posible eliminar una cuenta con saldo disponible.')
+      return
+    }
+
+    if (!canDeleteAccount(account)) {
+      toast.error('No es posible eliminar una cuenta cancelada o con saldo disponible.')
+      return
+    }
+
     setActiveAccount(account)
     setIsDeleteOpen(true)
   }
 
   const handleSubmit = async (data: AccountFormValues) => {
+    if (submitting) return
+
     try {
+      setSubmitting(true)
       if (formMode === 'edit' && activeAccount) {
         await update(String(activeAccount.id), {
+          accountNumber: data.accountNumber || activeAccount.accountNumber,
+          clientId: Number(data.clientId || activeAccount.client.id),
+          accountType: data.accountType || activeAccount.accountType,
           balance: data.balance,
           exemptGmf: data.exemptGmf,
           status: data.status,
@@ -94,22 +120,53 @@ export default function DashboardAccountsPage() {
         })
         toast.success('Cuenta creada correctamente')
       }
-      setIsFormOpen(false)
-      refresh()
+      closeForms()
+      await refresh()
     } catch (err: any) {
       toast.error(err?.message || 'Error al guardar la cuenta')
+    } finally {
+      setSubmitting(false)
     }
   }
 
   const handleDelete = async () => {
-    if (!activeAccount) return
+    if (!activeAccount || submitting) return
     try {
+      setSubmitting(true)
       await remove(String(activeAccount.id))
       toast.success('Cuenta eliminada correctamente')
       setIsDeleteOpen(false)
-      refresh()
+      await refresh()
     } catch (err: any) {
       toast.error(err?.message || 'Error al eliminar la cuenta')
+    } finally {
+      setSubmitting(false)
+      setActiveAccount(null)
+    }
+  }
+
+  const handleToggleStatus = async (account: Account) => {
+    if (submitting || account.status === 'CANCELLED') return
+
+    try {
+      setSubmitting(true)
+      const newStatus = account.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE'
+
+      await update(String(account.id), {
+        accountNumber: account.accountNumber,
+        clientId: account.client?.id,
+        accountType: account.accountType,
+        balance: account.balance,
+        exemptGmf: account.exemptGmf,
+        status: newStatus,
+      })
+
+      toast.success(newStatus === 'ACTIVE' ? 'Cuenta activada correctamente.' : 'Cuenta inactivada correctamente.')
+      await refresh()
+    } catch (err: any) {
+      toast.error(err?.message || 'No fue posible actualizar el estado.')
+    } finally {
+      setSubmitting(false)
     }
   }
 
@@ -121,7 +178,11 @@ export default function DashboardAccountsPage() {
         eyebrow="Gestión de cuentas"
         title="Cuentas"
         description="Administra las cuentas de ahorro y corrientes vinculadas a clientes con una experiencia clara y profesional."
-        actions={<Button onClick={openCreate}><Plus className="h-4 w-4" />Nueva cuenta</Button>}
+        actions={
+          <Button onClick={openCreate}>
+            <Plus className="h-4 w-4" />Nueva cuenta
+          </Button>
+        }
       />
 
       <Section title="Consulta y filtros" description="Filtra cuentas por tipo, estado o cliente para operar de forma ágil y ordenada.">
@@ -138,7 +199,7 @@ export default function DashboardAccountsPage() {
                 <label className="text-sm font-medium text-slate-700">Filtrar por tipo</label>
                 <select
                   value={typeFilter}
-                  onChange={(e) => setTypeFilter(e.target.value as typeof typeFilterOptions[number])}
+                  onChange={(e) => setTypeFilter(e.target.value as (typeof typeFilterOptions)[number])}
                   className="mt-3 w-full rounded-[20px] border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none focus:border-[#1D4ED8] focus:ring-2 focus:ring-sky-100"
                   aria-label="Filtrar por tipo de cuenta"
                 >
@@ -151,7 +212,7 @@ export default function DashboardAccountsPage() {
                 <label className="text-sm font-medium text-slate-700">Filtrar por estado</label>
                 <select
                   value={statusFilter}
-                  onChange={(e) => setStatusFilter(e.target.value as typeof statusFilterOptions[number])}
+                  onChange={(e) => setStatusFilter(e.target.value as (typeof statusFilterOptions)[number])}
                   className="mt-3 w-full rounded-[20px] border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none focus:border-[#1D4ED8] focus:ring-2 focus:ring-sky-100"
                   aria-label="Filtrar por estado"
                 >
@@ -195,9 +256,11 @@ export default function DashboardAccountsPage() {
             <AccountTable
               data={filteredAccounts}
               loading={false}
+              clients={clients}
               onView={openDetails}
               onEdit={openEdit}
               onDelete={openDelete}
+              onToggleStatus={handleToggleStatus}
             />
           )}
         </div>
@@ -211,6 +274,7 @@ export default function DashboardAccountsPage() {
           defaultValues={
             formMode === 'edit' && activeAccount
               ? {
+                  accountNumber: activeAccount.accountNumber,
                   clientId: String(activeAccount.client.id),
                   accountType: activeAccount.accountType,
                   balance: activeAccount.balance,
@@ -228,7 +292,7 @@ export default function DashboardAccountsPage() {
         />
       </AccountModal>
 
-      <AccountDetailsModal open={isDetailsOpen} onClose={() => setIsDetailsOpen(false)} account={activeAccount} />
+      <AccountDetailsModal open={isDetailsOpen} onClose={() => setIsDetailsOpen(false)} account={activeAccount} clients={clients} />
       <AccountDeleteDialog open={isDeleteOpen} onCancel={() => setIsDeleteOpen(false)} onConfirm={handleDelete} />
 
       {error && (

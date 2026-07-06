@@ -1,6 +1,7 @@
 "use client"
 
 import { Client } from '../../types/client'
+import { calculateAge, getClientFullName } from '../../lib/client-utils'
 import { Modal } from '../ui/Modal'
 
 type Props = {
@@ -26,7 +27,7 @@ export function ClientDetailsModal({ open, onClose, client }: Props) {
           </div>
           <div>
             <p className="text-xs uppercase tracking-[0.22em] text-slate-500">Nombres</p>
-            <p className="mt-2 font-medium text-slate-900">{client.firstName}</p>
+            <p className="mt-2 font-medium text-slate-900">{getClientFullName(client)}</p>
           </div>
           <div>
             <p className="text-xs uppercase tracking-[0.22em] text-slate-500">Apellidos</p>

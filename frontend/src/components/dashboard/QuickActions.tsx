@@ -30,13 +30,6 @@ const actions = [
     icon: ArrowLeftRight,
     color: "bg-violet-100 text-violet-600",
   },
-  {
-    title: "Exportar",
-    description: "Descargar reporte",
-    href: "#",
-    icon: Download,
-    color: "bg-amber-100 text-amber-600",
-  },
 ];
 
 export function QuickActions() {

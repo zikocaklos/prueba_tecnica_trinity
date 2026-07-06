@@ -34,16 +34,6 @@ const navigation = [
     href: "/dashboard/transacciones",
     icon: Activity,
   },
-  {
-    label: "Reportes",
-    href: "/dashboard/reportes",
-    icon: Briefcase,
-  },
-  {
-    label: "Configuración",
-    href: "/dashboard/configuracion",
-    icon: Settings,
-  },
 ];
 
 export function Sidebar() {
@@ -161,40 +151,6 @@ export function Sidebar() {
 
         </div>
       </div>
-
-      {/* Usuario */}
-      <div className="border-t border-slate-200 p-6">
-
-        <div className="flex items-center gap-4">
-
-          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-slate-900 to-slate-700 text-lg font-semibold text-white">
-            LG
-          </div>
-
-          <div className="flex-1">
-
-            <h3 className="font-semibold text-slate-900">
-              Laura Gómez
-            </h3>
-
-            <p className="text-sm text-slate-500">
-              Administrador
-            </p>
-
-          </div>
-
-        </div>
-
-        <button className="mt-5 flex w-full items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-100">
-
-          <LogOut className="h-4 w-4" />
-
-          Cerrar sesión
-
-        </button>
-
-      </div>
-
     </aside>
   );
 }

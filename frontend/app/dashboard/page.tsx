@@ -14,7 +14,6 @@ import { Card } from "../../src/components/ui/Card";
 // ESTOS LOS CREAREMOS EN EL SIGUIENTE PASO
 import { ActivityCard } from "../../src/components/dashboard/ActivityCard";
 import { QuickActions } from "../../src/components/dashboard/QuickActions";
-import { RecentClients } from "../../src/components/dashboard/RecentClients";
 
 const moduleLinks = [
   {
@@ -51,6 +50,7 @@ export default function DashboardPage() {
     transactionsLoading;
 
   const stats = [
+    
     {
       title: "Clientes",
       value: loading ? "..." : String(clients.length),
@@ -73,6 +73,44 @@ export default function DashboardPage() {
       accentClass: "bg-violet-100 text-violet-600",
     },
   ];
+  const activities = [
+    ...clients.map((client) => ({
+      type: "CLIENT" as const,
+      title: "Nuevo cliente registrado",
+      description: `${client.firstName} ${client.lastName}`,
+      date: new Date(client.createdAt),
+    })),
+
+    ...accounts.map((account) => ({
+      type: "ACCOUNT" as const,
+      title: "Cuenta creada",
+      description:
+        account.accountType === "SAVINGS"
+          ? "Cuenta de Ahorros"
+          : "Cuenta Corriente",
+      date: new Date(account.createdAt),
+    })),
+
+    ...transactions.map((transaction) => ({
+      type: transaction.type as
+        | "TRANSFER"
+        | "DEPOSIT"
+        | "WITHDRAW",
+
+      title:
+        transaction.type === "TRANSFER"
+          ? "Transferencia realizada"
+          : transaction.type === "DEPOSIT"
+          ? "Depósito realizado"
+          : "Retiro realizado",
+
+      description: `$${Number(transaction.amount).toLocaleString("es-CO")}`,
+
+      date: new Date(transaction.transactionDate),
+    })),
+  ]
+    .sort((a, b) => b.date.getTime() - a.date.getTime())
+    .slice(0, 6);
 
   return (
     <main className="space-y-8">
@@ -94,7 +132,7 @@ export default function DashboardPage() {
 
       <section className="grid gap-6 xl:grid-cols-[2fr_1fr]">
 
-        <ActivityCard />
+        <ActivityCard activities={activities} />
 
         <QuickActions />
 
@@ -116,8 +154,6 @@ export default function DashboardPage() {
           ))}
         </div>
       </Card>
-
-      <RecentClients clients={clients.slice(0, 5)} />
 
     </main>
   );

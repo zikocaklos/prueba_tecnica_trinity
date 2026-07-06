@@ -1,6 +1,7 @@
 "use client"
 
 import { Account } from '../../types/account'
+import { Client } from '../../types/client'
 import { Modal } from '../ui/Modal'
 import { AccountStatusBadge } from './AccountStatusBadge'
 
@@ -8,9 +9,24 @@ type Props = {
   open: boolean
   onClose: () => void
   account: Account | null
+  clients?: Client[]
 }
 
-export function AccountDetailsModal({ open, onClose, account }: Props) {
+function getClientDisplayName(account: Account, clients: Client[] = []) {
+  const matchedClient = clients.find((client) => client.id === account.client?.id)
+
+  if (matchedClient) {
+    return `${matchedClient.firstName} ${matchedClient.lastName}`.trim()
+  }
+
+  if (account.client?.firstName || account.client?.lastName) {
+    return `${account.client?.firstName ?? ''} ${account.client?.lastName ?? ''}`.trim()
+  }
+
+  return 'Sin cliente asignado'
+}
+
+export function AccountDetailsModal({ open, onClose, account, clients = [] }: Props) {
   if (!open || !account) return null
 
   return (
@@ -27,7 +43,7 @@ export function AccountDetailsModal({ open, onClose, account }: Props) {
           </div>
           <div>
             <p className="text-xs uppercase tracking-[0.22em] text-slate-500">Cliente</p>
-            <p className="mt-2 font-medium text-slate-900">{`${account.client.firstName} ${account.client.lastName}`}</p>
+            <p className="mt-2 font-medium text-slate-900">{getClientDisplayName(account, clients)}</p>
           </div>
           <div>
             <p className="text-xs uppercase tracking-[0.22em] text-slate-500">Estado</p>

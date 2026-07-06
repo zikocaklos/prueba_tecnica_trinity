@@ -5,13 +5,17 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { ClientFormValues, clientSchema } from '../../schemas/client.schema'
 import { Button } from '../ui/Button'
 import { Input } from '../ui/Input'
+import { Select } from '../ui/Select'
 
 type Props = {
   defaultValues?: Partial<ClientFormValues>
+  mode: 'create' | 'edit'
   onSubmit: (data: ClientFormValues) => Promise<void>
 }
 
-export function ClientForm({ defaultValues, onSubmit }: Props) {
+const identificationTypes = ['CC', 'CE', 'PASSPORT', 'NIT']
+
+export function ClientForm({ defaultValues, mode, onSubmit }: Props) {
   const {
     register,
     handleSubmit,
@@ -23,20 +27,27 @@ export function ClientForm({ defaultValues, onSubmit }: Props) {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+      <div className="rounded-2xl border border-blue-200 bg-blue-50 p-4 text-sm text-blue-700">
+        {mode === 'create'
+          ? 'Complete los datos del cliente para registrarlo en el sistema bancario.'
+          : 'Solo podrá modificar los datos personales del cliente; su documento no se puede cambiar.'}
+      </div>
+
       <div className="grid gap-4 md:grid-cols-2">
         <div>
-          <Input
-            id="identificationType"
-            label="Tipo de identificación"
-            {...register('identificationType')}
-            aria-invalid={errors.identificationType ? 'true' : 'false'}
-          />
+          <Select label="Tipo de identificación" disabled={mode === 'edit'} {...register('identificationType')}>
+            <option value="">Selecciona una opción</option>
+            {identificationTypes.map((type) => (
+              <option key={type} value={type}>{type}</option>
+            ))}
+          </Select>
           {errors.identificationType && <p className="mt-1 text-sm text-red-600">{errors.identificationType.message}</p>}
         </div>
         <div>
           <Input
             id="identificationNumber"
             label="Número de identificación"
+            readOnly={mode === 'edit'}
             {...register('identificationNumber')}
             aria-invalid={errors.identificationNumber ? 'true' : 'false'}
           />
@@ -88,8 +99,8 @@ export function ClientForm({ defaultValues, onSubmit }: Props) {
       </div>
 
       <div className="flex justify-end">
-        <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? 'Guardando...' : 'Guardar cliente'}
+        <Button type="submit" loading={isSubmitting} disabled={isSubmitting}>
+          {mode === 'create' ? 'Crear cliente' : 'Actualizar cliente'}
         </Button>
       </div>
     </form>

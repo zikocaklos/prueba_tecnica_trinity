@@ -1,42 +1,66 @@
+"use client";
+
 import {
   ArrowDownLeft,
   ArrowUpRight,
-  UserPlus,
   Landmark,
+  UserPlus,
 } from "lucide-react";
+import { formatDistanceToNow } from "date-fns";
+import { es } from "date-fns/locale";
 
-const activities = [
-  {
-    icon: UserPlus,
-    title: "Nuevo cliente registrado",
-    description: "María Rodríguez",
-    time: "Hace 5 min",
-    color: "bg-blue-100 text-blue-600",
-  },
-  {
-    icon: Landmark,
-    title: "Cuenta creada",
-    description: "Cuenta de ahorro",
-    time: "Hace 12 min",
-    color: "bg-emerald-100 text-emerald-600",
-  },
-  {
-    icon: ArrowUpRight,
-    title: "Transferencia enviada",
-    description: "$1.250.000",
-    time: "Hace 18 min",
-    color: "bg-violet-100 text-violet-600",
-  },
-  {
-    icon: ArrowDownLeft,
-    title: "Retiro realizado",
-    description: "$350.000",
-    time: "Hace 30 min",
-    color: "bg-amber-100 text-amber-600",
-  },
-];
+type Activity = {
+  type: "CLIENT" | "ACCOUNT" | "DEPOSIT" | "WITHDRAW" | "TRANSFER";
+  title: string;
+  description: string;
+  date: Date;
+};
 
-export function ActivityCard() {
+type Props = {
+  activities: Activity[];
+};
+
+export function ActivityCard({ activities }: Props) {
+  const getIcon = (type: Activity["type"]) => {
+    switch (type) {
+      case "CLIENT":
+        return {
+          icon: UserPlus,
+          color: "bg-blue-100 text-blue-600",
+        };
+
+      case "ACCOUNT":
+        return {
+          icon: Landmark,
+          color: "bg-emerald-100 text-emerald-600",
+        };
+
+      case "TRANSFER":
+        return {
+          icon: ArrowUpRight,
+          color: "bg-violet-100 text-violet-600",
+        };
+
+      case "DEPOSIT":
+        return {
+          icon: ArrowDownLeft,
+          color: "bg-cyan-100 text-cyan-600",
+        };
+
+      case "WITHDRAW":
+        return {
+          icon: ArrowUpRight,
+          color: "bg-amber-100 text-amber-600",
+        };
+
+      default:
+        return {
+          icon: Landmark,
+          color: "bg-slate-100 text-slate-600",
+        };
+    }
+  };
+
   return (
     <section className="rounded-3xl border border-slate-200 bg-white p-7 shadow-sm">
 
@@ -54,27 +78,24 @@ export function ActivityCard() {
 
         </div>
 
-        <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-500">
-          Hoy
-        </span>
-
       </div>
 
       <div className="mt-8 space-y-5">
 
         {activities.map((activity, index) => {
-          const Icon = activity.icon;
+
+          const { icon: Icon, color } = getIcon(activity.type);
 
           return (
             <div
               key={index}
-              className="group flex items-center justify-between rounded-2xl p-4 transition hover:bg-slate-50"
+              className="flex items-center justify-between rounded-2xl p-4 transition hover:bg-slate-50"
             >
 
               <div className="flex items-center gap-4">
 
                 <div
-                  className={`flex h-12 w-12 items-center justify-center rounded-2xl ${activity.color}`}
+                  className={`flex h-12 w-12 items-center justify-center rounded-2xl ${color}`}
                 >
                   <Icon className="h-5 w-5" />
                 </div>
@@ -94,7 +115,10 @@ export function ActivityCard() {
               </div>
 
               <span className="text-sm text-slate-400">
-                {activity.time}
+                {formatDistanceToNow(activity.date, {
+                  addSuffix: true,
+                  locale: es,
+                })}
               </span>
 
             </div>

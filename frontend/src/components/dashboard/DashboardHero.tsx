@@ -45,7 +45,7 @@ export function DashboardHero() {
               <span className="h-2.5 w-2.5 rounded-full bg-emerald-500" />
 
               <span className="text-sm font-medium text-emerald-700">
-                Backend conectado
+                conectado
               </span>
 
             </div>
