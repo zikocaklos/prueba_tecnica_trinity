@@ -2,6 +2,7 @@ package com.banco.application.service;
 
 import com.banco.application.exception.InsufficientFundsException;
 import com.banco.application.exception.TransactionNotFoundException;
+import com.banco.domain.enums.AccountStatus;
 import com.banco.domain.enums.TransactionType;
 import com.banco.domain.model.Account;
 import com.banco.domain.model.Transaction;
@@ -42,6 +43,10 @@ public class TransactionServiceImpl implements TransactionServicePort {
             Account existingDest = accountRepositoryPort.findById(dest.getId())
                     .orElseThrow(() -> new IllegalArgumentException("Destination account not found: " + dest.getId()));
 
+            if (existingDest.getStatus() != AccountStatus.ACTIVE) {
+                throw new IllegalArgumentException("Destination account is inactive: " + existingDest.getId());
+            }
+
             existingDest.setBalance((existingDest.getBalance() == null ? BigDecimal.ZERO : existingDest.getBalance()).add(amount));
             accountRepositoryPort.save(existingDest);
             transaction.setDestinationAccount(existingDest);
@@ -53,6 +58,10 @@ public class TransactionServiceImpl implements TransactionServicePort {
             }
             Account existingSrc = accountRepositoryPort.findById(src.getId())
                     .orElseThrow(() -> new IllegalArgumentException("Source account not found: " + src.getId()));
+
+            if (existingSrc.getStatus() != AccountStatus.ACTIVE) {
+                throw new IllegalArgumentException("Source account is inactive: " + existingSrc.getId());
+            }
 
             BigDecimal current = existingSrc.getBalance() == null ? BigDecimal.ZERO : existingSrc.getBalance();
             if (current.compareTo(amount) < 0) {
@@ -74,6 +83,13 @@ public class TransactionServiceImpl implements TransactionServicePort {
                     .orElseThrow(() -> new IllegalArgumentException("Source account not found: " + src.getId()));
             Account existingDest = accountRepositoryPort.findById(dest.getId())
                     .orElseThrow(() -> new IllegalArgumentException("Destination account not found: " + dest.getId()));
+
+            if (existingSrc.getStatus() != AccountStatus.ACTIVE) {
+                throw new IllegalArgumentException("Source account is inactive: " + existingSrc.getId());
+            }
+            if (existingDest.getStatus() != AccountStatus.ACTIVE) {
+                throw new IllegalArgumentException("Destination account is inactive: " + existingDest.getId());
+            }
 
             BigDecimal current = existingSrc.getBalance() == null ? BigDecimal.ZERO : existingSrc.getBalance();
             if (current.compareTo(amount) < 0) {

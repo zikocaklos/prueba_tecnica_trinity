@@ -39,6 +39,7 @@ export function TransactionForm({ accounts, defaultValues, onSubmit }: Props) {
   })
 
   const type = useWatch({ control, name: 'type', defaultValue: initialValues.type }) || initialValues.type || 'DEPOSIT'
+  const usableAccounts = accounts.filter((account) => account.status === 'ACTIVE' && !account.deleted)
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
@@ -57,7 +58,7 @@ export function TransactionForm({ accounts, defaultValues, onSubmit }: Props) {
         <div>
           <Select label="Cuenta destino" {...register('destinationAccountId')}>
             <option value="">Selecciona una cuenta destino</option>
-            {accounts.map((account) => (
+            {usableAccounts.map((account) => (
               <option key={account.id} value={account.id}>
                 {`${account.accountNumber} — ${account.accountType} — Saldo ${account.balance.toFixed(2)}`}
               </option>
@@ -71,7 +72,7 @@ export function TransactionForm({ accounts, defaultValues, onSubmit }: Props) {
         <div>
           <Select label="Cuenta origen" {...register('sourceAccountId')}>
             <option value="">Selecciona una cuenta origen</option>
-            {accounts.map((account) => (
+            {usableAccounts.map((account) => (
               <option key={account.id} value={account.id}>
                 {`${account.accountNumber} — ${account.accountType} — Saldo ${account.balance.toFixed(2)}`}
               </option>
@@ -86,7 +87,7 @@ export function TransactionForm({ accounts, defaultValues, onSubmit }: Props) {
           <div>
             <Select label="Cuenta origen" {...register('sourceAccountId')}>
               <option value="">Selecciona una cuenta origen</option>
-              {accounts.map((account) => (
+              {usableAccounts.map((account) => (
                 <option key={account.id} value={account.id}>
                   {`${account.accountNumber} — ${account.accountType} — Saldo ${account.balance.toFixed(2)}`}
                 </option>
@@ -97,7 +98,7 @@ export function TransactionForm({ accounts, defaultValues, onSubmit }: Props) {
           <div>
             <Select label="Cuenta destino" {...register('destinationAccountId')}>
               <option value="">Selecciona una cuenta destino</option>
-              {accounts.map((account) => (
+              {usableAccounts.map((account) => (
                 <option key={account.id} value={account.id}>
                   {`${account.accountNumber} — ${account.accountType} — Saldo ${account.balance.toFixed(2)}`}
                 </option>

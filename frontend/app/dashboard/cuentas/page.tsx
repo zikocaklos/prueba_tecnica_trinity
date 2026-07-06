@@ -37,10 +37,12 @@ export default function DashboardAccountsPage() {
   const [formMode, setFormMode] = useState<'create' | 'edit'>('create')
   const [submitting, setSubmitting] = useState(false)
 
+  const visibleAccounts = useMemo(() => accounts.filter((account) => !account.deleted), [accounts])
+
   const filteredAccounts = useMemo(() => {
     const query = searchQuery.trim().toLowerCase()
 
-    return accounts.filter((account) => {
+    return visibleAccounts.filter((account) => {
       const matchSearch = [account.accountNumber, account.client.firstName, account.client.lastName, account.accountType]
         .join(' ')
         .toLowerCase()
@@ -52,7 +54,7 @@ export default function DashboardAccountsPage() {
 
       return matchSearch && matchType && matchStatus && matchClient
     })
-  }, [accounts, searchQuery, typeFilter, statusFilter, clientFilter])
+  }, [visibleAccounts, searchQuery, typeFilter, statusFilter, clientFilter])
 
   const closeForms = () => {
     setIsFormOpen(false)
@@ -229,15 +231,15 @@ export default function DashboardAccountsPage() {
             <div className="mt-4 space-y-3 text-sm text-slate-700">
               <div className="flex items-center justify-between gap-2">
                 <span>Total cuentas</span>
-                <span className="font-semibold text-[#1E3A8A]">{accounts.length}</span>
+                <span className="font-semibold text-[#1E3A8A]">{visibleAccounts.length}</span>
               </div>
               <div className="flex items-center justify-between gap-2">
                 <span>Cuentas activas</span>
-                <span className="font-semibold text-[#1E3A8A]">{accounts.filter((acc) => acc.status === 'ACTIVE').length}</span>
+                <span className="font-semibold text-[#1E3A8A]">{visibleAccounts.filter((acc) => acc.status === 'ACTIVE').length}</span>
               </div>
               <div className="flex items-center justify-between gap-2">
                 <span>Cuentas canceladas</span>
-                <span className="font-semibold text-[#1E3A8A]">{accounts.filter((acc) => acc.status === 'CANCELLED').length}</span>
+                <span className="font-semibold text-[#1E3A8A]">{visibleAccounts.filter((acc) => acc.status === 'CANCELLED').length}</span>
               </div>
             </div>
           </div>
@@ -269,7 +271,7 @@ export default function DashboardAccountsPage() {
       <AccountModal open={isFormOpen} onClose={() => setIsFormOpen(false)} title={formMode === 'edit' ? 'Editar cuenta' : 'Nueva cuenta'}>
         <AccountForm
           clients={clients}
-          existingAccounts={accounts}
+          existingAccounts={visibleAccounts}
           mode={formMode}
           defaultValues={
             formMode === 'edit' && activeAccount
