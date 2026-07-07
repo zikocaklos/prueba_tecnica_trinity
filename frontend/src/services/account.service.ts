@@ -28,13 +28,15 @@ function buildAccountNumberPrefix(accountType: AccountType) {
 
 export function generateAccountNumber(accountType: AccountType, existingAccounts: Account[]) {
   const prefix = buildAccountNumberPrefix(accountType)
+  const usableAccounts = (existingAccounts || []).filter((account) => !account.deleted)
+
   const usedNumbers = new Set(
-    existingAccounts
+    usableAccounts
       .filter((account) => account.accountNumber.startsWith(prefix))
       .map((account) => account.accountNumber)
   )
 
-  const existingSuffixes = existingAccounts
+  const existingSuffixes = usableAccounts
     .filter((account) => account.accountNumber.startsWith(prefix))
     .map((account) => parseInt(account.accountNumber.slice(2), 10))
     .filter((value) => !Number.isNaN(value))

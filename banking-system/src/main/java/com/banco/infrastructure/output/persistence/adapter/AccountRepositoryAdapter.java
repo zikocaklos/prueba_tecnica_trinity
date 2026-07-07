@@ -53,7 +53,6 @@ public class AccountRepositoryAdapter implements AccountRepositoryPort {
     @Override
     public List<Account> findAll() {
         return accountRepository.findAll().stream()
-                .filter(entity -> entity.getDeleted() == null || !entity.getDeleted())
                 .map(AccountMapper::toDomain)
                 .collect(Collectors.toList());
     }

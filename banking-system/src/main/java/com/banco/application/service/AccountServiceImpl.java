@@ -13,6 +13,9 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -39,7 +42,62 @@ public class AccountServiceImpl implements AccountServicePort {
                 .orElseThrow(() -> new ClientNotFoundException("Client not found: " + client.getId()));
 
         account.setClient(existing);
+        account.setAccountNumber(resolveUniqueAccountNumber(account));
         return accountRepositoryPort.save(account);
+    }
+
+    private String resolveUniqueAccountNumber(Account account) {
+        String requestedAccountNumber = account.getAccountNumber();
+        if (requestedAccountNumber == null || requestedAccountNumber.isBlank()) {
+            return generateNextAvailableAccountNumber(account.getAccountType());
+        }
+
+        List<Account> existingAccounts = accountRepositoryPort.findAll();
+        Set<String> usedAccountNumbers = existingAccounts.stream()
+                .map(Account::getAccountNumber)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+
+        if (!usedAccountNumbers.contains(requestedAccountNumber)) {
+            return requestedAccountNumber;
+        }
+
+        return generateNextAvailableAccountNumber(account.getAccountType(), usedAccountNumbers);
+    }
+
+    private String generateNextAvailableAccountNumber(com.banco.domain.enums.AccountType accountType) {
+        return generateNextAvailableAccountNumber(accountType, Set.of());
+    }
+
+    private String generateNextAvailableAccountNumber(com.banco.domain.enums.AccountType accountType, Set<String> usedAccountNumbers) {
+        String prefix = accountType == com.banco.domain.enums.AccountType.SAVINGS ? "53" : "33";
+        int nextSuffix = 1;
+        List<Integer> existingSuffixes = accountRepositoryPort.findAll().stream()
+                .map(Account::getAccountNumber)
+                .filter(Objects::nonNull)
+                .filter(number -> number.startsWith(prefix))
+                .map(number -> {
+                    try {
+                        return Integer.parseInt(number.substring(2));
+                    } catch (NumberFormatException ex) {
+                        return null;
+                    }
+                })
+                .filter(Objects::nonNull)
+                .sorted()
+                .toList();
+
+        if (!existingSuffixes.isEmpty()) {
+            nextSuffix = existingSuffixes.get(existingSuffixes.size() - 1) + 1;
+        }
+
+        while (true) {
+            String candidate = prefix + String.format("%08d", nextSuffix);
+            if (!usedAccountNumbers.contains(candidate)) {
+                return candidate;
+            }
+            nextSuffix++;
+        }
     }
 
     @Override

@@ -74,6 +74,26 @@ class AccountServiceTest {
     }
 
     @Test
+    void shouldGenerateNewAccountNumberWhenRequestedNumberAlreadyExists() {
+        when(clientRepositoryPort.findById(10L)).thenReturn(Optional.of(client));
+        when(accountRepositoryPort.findAll()).thenReturn(List.of(Account.builder().accountNumber("5300000001").accountType(AccountType.SAVINGS).build()));
+        when(accountRepositoryPort.save(any(Account.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        Account duplicateAccount = Account.builder()
+                .accountNumber("5300000001")
+                .accountType(AccountType.SAVINGS)
+                .status(AccountStatus.ACTIVE)
+                .balance(new BigDecimal("100.00"))
+                .client(client)
+                .build();
+
+        Account created = accountService.create(duplicateAccount);
+
+        assertEquals("5300000002", created.getAccountNumber());
+        verify(accountRepositoryPort).save(duplicateAccount);
+    }
+
+    @Test
     void shouldThrowExceptionWhenCreatingAccountWithoutClient() {
         Account invalidAccount = Account.builder().accountNumber("ACC-002").build();
 

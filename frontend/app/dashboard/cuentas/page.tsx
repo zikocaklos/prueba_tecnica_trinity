@@ -271,7 +271,7 @@ export default function DashboardAccountsPage() {
       <AccountModal open={isFormOpen} onClose={() => setIsFormOpen(false)} title={formMode === 'edit' ? 'Editar cuenta' : 'Nueva cuenta'}>
         <AccountForm
           clients={clients}
-          existingAccounts={visibleAccounts}
+          existingAccounts={accounts}
           mode={formMode}
           defaultValues={
             formMode === 'edit' && activeAccount
