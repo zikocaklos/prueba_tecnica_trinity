@@ -1,0 +1,270 @@
+<main class="space-y-8">
+  <!-- Toast -->
+  @if (toastVisible) {
+    <div class="fixed top-4 right-4 z-[100] animate-in fade-in slide-in-from-top-2">
+      <div [class]="toastType === 'success' ? 'bg-emerald-600' : 'bg-red-600'" class="rounded-2xl px-6 py-4 text-sm font-medium text-white shadow-lg">
+        {{ toastMessage }}
+      </div>
+    </div>
+  }
+
+  <!-- PageHeader -->
+  <div class="space-y-6 rounded-2xl border border-brand-border bg-white p-6 shadow-soft">
+    <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+      <div class="max-w-3xl">
+        <p class="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">Gesti&oacute;n de clientes</p>
+        <h1 class="mt-3 text-3xl font-semibold tracking-tight text-slate-950 sm:text-4xl">Clientes</h1>
+        <p class="mt-3 text-sm leading-7 text-slate-500">Administra los clientes registrados en la entidad financiera desde un panel seguro y profesional.</p>
+      </div>
+      <div class="flex flex-wrap items-center gap-3">
+        <app-button (click)="openCreate()">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
+          Nuevo cliente
+        </app-button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section -->
+  <section class="rounded-[32px] border border-slate-200/80 bg-white/90 p-6 shadow-[0_18px_50px_-24px_rgba(15,23,42,0.2)] backdrop-blur-xl">
+    <div class="mb-6">
+      <h2 class="text-lg font-semibold text-slate-950">Operaciones y consulta</h2>
+      <p class="mt-2 text-sm leading-6 text-slate-600">Consulta, filtra y gestiona clientes con una experiencia uniforme en todo el sistema.</p>
+    </div>
+
+    <div class="grid gap-4 xl:grid-cols-[1.2fr_0.8fr] xl:items-end">
+      <div class="grid gap-4 md:grid-cols-2">
+        <app-search-bar [value]="searchQuery()" (onChange)="searchQuery.set($event)" placeholder="Buscar por nombre, apellido, documento o correo" ariaLabel="Buscar clientes" />
+        <div class="grid gap-3 md:grid-cols-2">
+          <div class="rounded-[24px] border border-slate-200 bg-slate-50 p-4">
+            <label class="text-sm font-medium text-slate-700">Tipo doc.</label>
+            <select [ngModel]="identificationFilter()" (ngModelChange)="identificationFilter.set($event)" class="mt-3 w-full rounded-[20px] border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none">
+              @for (opt of identificationFilterOptions; track opt) {
+                <option [value]="opt">{{ opt === 'ALL' ? 'Todos' : opt }}</option>
+              }
+            </select>
+          </div>
+          <div class="rounded-[24px] border border-slate-200 bg-slate-50 p-4">
+            <label class="text-sm font-medium text-slate-700">Productos</label>
+            <select [ngModel]="productFilter()" (ngModelChange)="productFilter.set($event)" class="mt-3 w-full rounded-[20px] border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none">
+              @for (opt of productFilterOptions; track opt) {
+                <option [value]="opt">{{ opt === 'ALL' ? 'Todos' : opt === 'WITH_PRODUCTS' ? 'Con productos' : 'Sin productos' }}</option>
+              }
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="rounded-[24px] border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
+        <p class="font-semibold text-slate-950">Clientes totales</p>
+        <p class="mt-2 text-3xl font-semibold text-[#1E3A8A]">{{ clients().length }}</p>
+      </div>
+    </div>
+
+    <div class="mt-6">
+      @if (isLoading()) {
+        <app-loading-spinner />
+      } @else if (filteredClients().length === 0) {
+        <app-empty-state title="No se encontraron clientes" description="Ajusta la b&uacute;squeda o registra un nuevo cliente para comenzar.">
+          <div action>
+            <app-button (click)="openCreate()">Crear cliente</app-button>
+          </div>
+        </app-empty-state>
+      } @else {
+        <div class="overflow-hidden rounded-[32px] border border-slate-200 bg-white shadow-sm">
+          <div class="grid gap-2 bg-slate-50 p-4 text-sm font-semibold uppercase tracking-[0.24em] text-slate-500 sm:grid-cols-[220px_220px_1fr_180px_180px_140px]">
+            <span>Tipo doc.</span>
+            <span>N&uacute;mero doc.</span>
+            <span>Nombre completo</span>
+            <span>Correo</span>
+            <span>Edad</span>
+            <span class="text-right">Acciones</span>
+          </div>
+          <div class="space-y-3 p-4">
+            @for (client of filteredClients(); track client.id) {
+              <div class="grid gap-2 rounded-[26px] border border-slate-200 bg-white p-4 text-sm text-slate-700 shadow-sm transition hover:border-slate-300 hover:shadow-md sm:grid-cols-[220px_220px_1fr_180px_180px_140px] sm:items-center">
+                <span class="font-medium text-slate-900">{{ client.identificationType }}</span>
+                <span>{{ client.identificationNumber }}</span>
+                <span>{{ getClientFullName(client) }}</span>
+                <span>{{ client.email }}</span>
+                <span>{{ calculateAge(client.birthDate) ?? 'N/D' }} a&ntilde;os</span>
+                <div class="relative mt-4 flex items-center justify-end gap-2 sm:mt-0" (click)="$event.stopPropagation()">
+                  <div class="relative inline-flex">
+                    <button type="button" (click)="toggleMenu(client.id)" class="inline-flex h-10 items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 text-sm font-medium text-slate-700">
+                      Acciones
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+                    </button>
+                    @if (openMenuId === client.id) {
+                      <div class="absolute right-0 z-10 mt-14 w-48 rounded-2xl border border-slate-200 bg-white p-2 shadow-xl">
+                        <button type="button" (click)="openDetails(client); openMenuId = null" class="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-sm text-slate-700 hover:bg-slate-50">
+                          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                          Ver detalle
+                        </button>
+                        <button type="button" (click)="openEdit(client); openMenuId = null" class="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-sm text-slate-700 hover:bg-slate-50">
+                          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
+                          Editar
+                        </button>
+                        <button type="button" (click)="openDelete(client); openMenuId = null" class="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-sm text-red-600 hover:bg-slate-50">
+                          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+                          Eliminar
+                        </button>
+                      </div>
+                    }
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  </section>
+
+  <!-- Create/Edit Modal -->
+  @if (isFormOpen) {
+    <app-modal [open]="isFormOpen" (onClose)="isFormOpen = false" [title]="formMode === 'edit' ? 'Editar cliente' : 'Nuevo cliente'">
+      <form (ngSubmit)="handleSubmit()" class="space-y-5">
+        <div class="rounded-2xl border border-blue-200 bg-blue-50 p-4 text-sm text-blue-700">
+          {{ formMode === 'create' ? 'Complete los datos del cliente para registrarlo en el sistema bancario.' : 'Solo podr\u00e1 modificar los datos personales del cliente; su documento no se puede cambiar.' }}
+        </div>
+
+        <div class="grid gap-4 md:grid-cols-2">
+          <div>
+            <label class="block">
+              <span class="text-sm font-medium text-slate-700">Tipo de identificaci&oacute;n</span>
+              <select [(ngModel)]="formIdentificationType" name="identificationType" [disabled]="formMode === 'edit'" class="mt-2 block w-full rounded-3xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition duration-200 focus:border-sky-500 focus:ring-2 focus:ring-sky-100">
+                <option value="">Selecciona una opci&oacute;n</option>
+                @for (type of identificationTypes; track type) {
+                  <option [value]="type">{{ type }}</option>
+                }
+              </select>
+            </label>
+            @if (formErrors['identificationType']) {
+              <p class="mt-1 text-sm text-red-600">{{ formErrors['identificationType'] }}</p>
+            }
+          </div>
+          <div>
+            <label class="block">
+              <span class="text-sm font-medium text-slate-700">N&uacute;mero de identificaci&oacute;n</span>
+              <input [(ngModel)]="formIdentificationNumber" name="identificationNumber" [readonly]="formMode === 'edit'" class="mt-2 block w-full rounded-3xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition duration-200 placeholder:text-slate-400 focus:border-sky-500 focus:ring-2 focus:ring-sky-100" />
+            </label>
+            @if (formErrors['identificationNumber']) {
+              <p class="mt-1 text-sm text-red-600">{{ formErrors['identificationNumber'] }}</p>
+            }
+          </div>
+        </div>
+
+        <div class="grid gap-4 md:grid-cols-2">
+          <div>
+            <label class="block">
+              <span class="text-sm font-medium text-slate-700">Nombres</span>
+              <input [(ngModel)]="formFirstName" name="firstName" class="mt-2 block w-full rounded-3xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition duration-200 placeholder:text-slate-400 focus:border-sky-500 focus:ring-2 focus:ring-sky-100" />
+            </label>
+            @if (formErrors['firstName']) {
+              <p class="mt-1 text-sm text-red-600">{{ formErrors['firstName'] }}</p>
+            }
+          </div>
+          <div>
+            <label class="block">
+              <span class="text-sm font-medium text-slate-700">Apellidos</span>
+              <input [(ngModel)]="formLastName" name="lastName" class="mt-2 block w-full rounded-3xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition duration-200 placeholder:text-slate-400 focus:border-sky-500 focus:ring-2 focus:ring-sky-100" />
+            </label>
+            @if (formErrors['lastName']) {
+              <p class="mt-1 text-sm text-red-600">{{ formErrors['lastName'] }}</p>
+            }
+          </div>
+        </div>
+
+        <div>
+          <label class="block">
+            <span class="text-sm font-medium text-slate-700">Correo electr&oacute;nico</span>
+            <input [(ngModel)]="formEmail" name="email" type="email" class="mt-2 block w-full rounded-3xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition duration-200 placeholder:text-slate-400 focus:border-sky-500 focus:ring-2 focus:ring-sky-100" />
+          </label>
+          @if (formErrors['email']) {
+            <p class="mt-1 text-sm text-red-600">{{ formErrors['email'] }}</p>
+          }
+        </div>
+
+        <div>
+          <label class="block">
+            <span class="text-sm font-medium text-slate-700">Fecha de nacimiento</span>
+            <input [(ngModel)]="formBirthDate" name="birthDate" type="date" class="mt-2 block w-full rounded-3xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition duration-200 placeholder:text-slate-400 focus:border-sky-500 focus:ring-2 focus:ring-sky-100" />
+          </label>
+          @if (formErrors['birthDate']) {
+            <p class="mt-1 text-sm text-red-600">{{ formErrors['birthDate'] }}</p>
+          }
+        </div>
+
+        <div class="flex justify-end">
+          <app-button type="submit" [loading]="submitting" [disabled]="submitting">
+            {{ formMode === 'create' ? 'Crear cliente' : 'Actualizar cliente' }}
+          </app-button>
+        </div>
+      </form>
+    </app-modal>
+  }
+
+  <!-- Details Modal -->
+  @if (isDetailsOpen && activeClient) {
+    <app-modal [open]="isDetailsOpen" (onClose)="isDetailsOpen = false" title="Detalle del cliente">
+      <div class="space-y-5 text-sm text-slate-700">
+        <div class="grid gap-4 md:grid-cols-2">
+          <div>
+            <p class="text-xs uppercase tracking-[0.22em] text-slate-500">Tipo de identificaci&oacute;n</p>
+            <p class="mt-2 font-medium text-slate-900">{{ activeClient.identificationType }}</p>
+          </div>
+          <div>
+            <p class="text-xs uppercase tracking-[0.22em] text-slate-500">N&uacute;mero de identificaci&oacute;n</p>
+            <p class="mt-2 font-medium text-slate-900">{{ activeClient.identificationNumber }}</p>
+          </div>
+          <div>
+            <p class="text-xs uppercase tracking-[0.22em] text-slate-500">Nombres</p>
+            <p class="mt-2 font-medium text-slate-900">{{ getClientFullName(activeClient) }}</p>
+          </div>
+          <div>
+            <p class="text-xs uppercase tracking-[0.22em] text-slate-500">Apellidos</p>
+            <p class="mt-2 font-medium text-slate-900">{{ activeClient.lastName }}</p>
+          </div>
+          <div>
+            <p class="text-xs uppercase tracking-[0.22em] text-slate-500">Correo electr&oacute;nico</p>
+            <p class="mt-2 font-medium text-slate-900">{{ activeClient.email }}</p>
+          </div>
+          <div>
+            <p class="text-xs uppercase tracking-[0.22em] text-slate-500">Fecha de nacimiento</p>
+            <p class="mt-2 font-medium text-slate-900">{{ activeClient.birthDate | date:'shortDate' }}</p>
+          </div>
+          <div>
+            <p class="text-xs uppercase tracking-[0.22em] text-slate-500">Fecha de creaci&oacute;n</p>
+            <p class="mt-2 font-medium text-slate-900">{{ activeClient.createdAt | date:'short' }}</p>
+          </div>
+          <div>
+            <p class="text-xs uppercase tracking-[0.22em] text-slate-500">&Uacute;ltima actualizaci&oacute;n</p>
+            <p class="mt-2 font-medium text-slate-900">{{ activeClient.updatedAt | date:'short' }}</p>
+          </div>
+        </div>
+      </div>
+    </app-modal>
+  }
+
+  <!-- Delete Confirmation -->
+  @if (isDeleteOpen) {
+    <app-modal [open]="isDeleteOpen" (onClose)="isDeleteOpen = false" title="Eliminar cliente" size="sm">
+      <div class="space-y-5">
+        <div class="flex items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+          <svg xmlns="http://www.w3.org/2000/svg" class="mt-0.5 h-5 w-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+          <p>Esta acci&oacute;n eliminar&aacute; permanentemente al cliente {{ activeClient ? '"' + getClientFullName(activeClient) + '"' : 'seleccionado' }} del sistema.</p>
+        </div>
+        <div class="flex justify-end gap-3">
+          <app-button variant="secondary" (click)="isDeleteOpen = false">Cancelar</app-button>
+          <app-button variant="danger" (click)="handleDelete()">Eliminar</app-button>
+        </div>
+      </div>
+    </app-modal>
+  }
+
+  <!-- Error Banner -->
+  @if (error()) {
+    <div class="rounded-[32px] border border-red-200 bg-red-50 p-5 text-sm text-red-700">
+      Ocurri&oacute; un error al cargar los clientes. Por favor recarga la p&aacute;gina o revisa la conexi&oacute;n con la API.
+    </div>
+  }
+</main>

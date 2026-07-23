@@ -1,0 +1,220 @@
+<main class="space-y-8">
+  @if (toastVisible) {
+    <div class="fixed top-4 right-4 z-[100] animate-in fade-in slide-in-from-top-2">
+      <div [class]="toastType === 'success' ? 'bg-emerald-600' : 'bg-red-600'" class="rounded-2xl px-6 py-4 text-sm font-medium text-white shadow-lg">{{ toastMessage }}</div>
+    </div>
+  }
+
+  <div class="space-y-6 rounded-2xl border border-brand-border bg-white p-6 shadow-soft">
+    <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+      <div class="max-w-3xl">
+        <p class="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">Gesti&oacute;n de transacciones</p>
+        <h1 class="mt-3 text-3xl font-semibold tracking-tight text-slate-950 sm:text-4xl">Transacciones</h1>
+        <p class="mt-3 text-sm leading-7 text-slate-500">Registra consignaciones, retiros y transferencias con controles visuales claros y profesionales.</p>
+      </div>
+      <div class="flex flex-wrap items-center gap-3">
+        <app-button (click)="openCreate()">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
+          Nueva transacci&oacute;n
+        </app-button>
+      </div>
+    </div>
+  </div>
+
+  <section class="rounded-[32px] border border-slate-200/80 bg-white/90 p-6 shadow-[0_18px_50px_-24px_rgba(15,23,42,0.2)] backdrop-blur-xl">
+    <div class="mb-6">
+      <h2 class="text-lg font-semibold text-slate-950">Consulta y filtros</h2>
+      <p class="mt-2 text-sm leading-6 text-slate-600">Filtra transacciones y consulta el historial sin perder claridad visual.</p>
+    </div>
+
+    <div class="grid gap-4 lg:grid-cols-[1.4fr_0.8fr]">
+      <app-search-bar [value]="searchQuery()" (onChange)="searchQuery.set($event)" placeholder="Buscar por ID, tipo o n&uacute;mero de cuenta" ariaLabel="Buscar transacciones" />
+      <div class="grid gap-3">
+        <div class="rounded-[24px] border border-slate-200 bg-slate-50 p-4">
+          <label class="text-sm font-medium text-slate-700">Filtrar por tipo</label>
+          <select [ngModel]="typeFilter()" (ngModelChange)="typeFilter.set($event)" class="mt-3 w-full rounded-[20px] border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none focus:border-[#1D4ED8] focus:ring-2 focus:ring-sky-100">
+            @for (opt of transactionTypeFilters; track opt) {
+              <option [value]="opt">{{ opt === 'ALL' ? 'Todos los tipos' : opt }}</option>
+            }
+          </select>
+        </div>
+        <div class="rounded-[24px] border border-slate-200 bg-slate-50 p-4">
+          <p class="text-sm font-medium text-slate-700">Estado de datos</p>
+          <div class="mt-3 inline-flex items-center gap-2 rounded-[20px] border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+            {{ isLoading() ? 'Cargando datos...' : 'Datos sincronizados' }}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-6">
+      @if (isLoading()) {
+        <app-loading-spinner />
+      } @else if (filteredTransactions().length === 0) {
+        <app-empty-state title="No se encontraron transacciones" description="Intenta con otros filtros o registra una nueva transacci&oacute;n.">
+          <div action><app-button (click)="openCreate()">Crear transacci&oacute;n</app-button></div>
+        </app-empty-state>
+      } @else {
+        <div class="overflow-hidden rounded-[32px] border border-slate-200 bg-white shadow-sm">
+          <div class="grid gap-2 bg-slate-50 p-4 text-sm font-semibold uppercase tracking-[0.24em] text-slate-500 sm:grid-cols-[70px_120px_1fr_1.2fr_1.2fr_120px]">
+            <span>ID</span>
+            <span>Tipo</span>
+            <span class="text-right">Monto</span>
+            <span>Fecha</span>
+            <span>Cuenta Origen / Destino</span>
+            <span class="text-right">Acciones</span>
+          </div>
+          <div class="space-y-3 p-4">
+            @for (t of filteredTransactions(); track t.id) {
+              <div class="grid gap-2 rounded-[26px] border border-slate-200 bg-white p-4 text-sm text-slate-700 shadow-sm transition hover:border-slate-300 hover:shadow-md sm:grid-cols-[70px_120px_1fr_1.2fr_1.2fr_120px] sm:items-center">
+                <span class="font-medium text-slate-900">{{ t.id }}</span>
+                <span><span [class]="'inline-flex rounded-full px-3 py-1 text-xs font-semibold ' + badgeStyles[t.type]">{{ t.type }}</span></span>
+                <span class="text-right font-semibold text-slate-950">${{ t.amount.toFixed(2) }}</span>
+                <span>{{ t.transactionDate | date:'short' }}</span>
+                <span>{{ t.sourceAccount?.accountNumber ?? '&mdash;' }} &rarr; {{ t.destinationAccount?.accountNumber ?? '&mdash;' }}</span>
+                <div class="flex items-center justify-end gap-2">
+                  <button type="button" (click)="openDetails(t)" class="inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-slate-50 text-slate-700 transition hover:border-slate-300 hover:bg-slate-100" aria-label="Ver detalle">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                  </button>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  </section>
+
+  <!-- Create Modal -->
+  @if (isModalOpen) {
+    <app-modal [open]="isModalOpen" (onClose)="isModalOpen = false" title="Nueva transacci&oacute;n">
+      <form (ngSubmit)="handleCreateTransaction()" class="space-y-5">
+        <div>
+          <label class="block">
+            <span class="text-sm font-medium text-slate-700">Tipo de transacci&oacute;n</span>
+            <select [(ngModel)]="formType" name="type" class="mt-2 block w-full rounded-3xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition duration-200 focus:border-sky-500 focus:ring-2 focus:ring-sky-100">
+              @for (opt of transactionTypeOptions; track opt.value) {
+                <option [value]="opt.value">{{ opt.label }}</option>
+              }
+            </select>
+          </label>
+          @if (formErrors['type']) { <p class="mt-1 text-sm text-red-600">{{ formErrors['type'] }}</p> }
+        </div>
+
+        @if (formType === 'DEPOSIT') {
+          <div>
+            <label class="block">
+              <span class="text-sm font-medium text-slate-700">Cuenta destino</span>
+              <select [(ngModel)]="formDestinationAccountId" name="destinationAccountId" class="mt-2 block w-full rounded-3xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition duration-200 focus:border-sky-500 focus:ring-2 focus:ring-sky-100">
+                <option value="">Selecciona una cuenta destino</option>
+                @for (acc of usableAccounts(); track acc.id) {
+                  <option [value]="acc.id">{{ acc.accountNumber }} &mdash; {{ acc.accountType }} &mdash; Saldo {{ acc.balance.toFixed(2) }}</option>
+                }
+              </select>
+            </label>
+            @if (formErrors['destinationAccountId']) { <p class="mt-1 text-sm text-red-600">{{ formErrors['destinationAccountId'] }}</p> }
+          </div>
+        }
+
+        @if (formType === 'WITHDRAWAL') {
+          <div>
+            <label class="block">
+              <span class="text-sm font-medium text-slate-700">Cuenta origen</span>
+              <select [(ngModel)]="formSourceAccountId" name="sourceAccountId" class="mt-2 block w-full rounded-3xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition duration-200 focus:border-sky-500 focus:ring-2 focus:ring-sky-100">
+                <option value="">Selecciona una cuenta origen</option>
+                @for (acc of usableAccounts(); track acc.id) {
+                  <option [value]="acc.id">{{ acc.accountNumber }} &mdash; {{ acc.accountType }} &mdash; Saldo {{ acc.balance.toFixed(2) }}</option>
+                }
+              </select>
+            </label>
+            @if (formErrors['sourceAccountId']) { <p class="mt-1 text-sm text-red-600">{{ formErrors['sourceAccountId'] }}</p> }
+          </div>
+        }
+
+        @if (formType === 'TRANSFER') {
+          <div class="grid gap-4 md:grid-cols-2">
+            <div>
+              <label class="block">
+                <span class="text-sm font-medium text-slate-700">Cuenta origen</span>
+                <select [(ngModel)]="formSourceAccountId" name="sourceAccountId" class="mt-2 block w-full rounded-3xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition duration-200 focus:border-sky-500 focus:ring-2 focus:ring-sky-100">
+                  <option value="">Selecciona una cuenta origen</option>
+                  @for (acc of usableAccounts(); track acc.id) {
+                    <option [value]="acc.id">{{ acc.accountNumber }} &mdash; {{ acc.accountType }} &mdash; Saldo {{ acc.balance.toFixed(2) }}</option>
+                  }
+                </select>
+              </label>
+              @if (formErrors['sourceAccountId']) { <p class="mt-1 text-sm text-red-600">{{ formErrors['sourceAccountId'] }}</p> }
+            </div>
+            <div>
+              <label class="block">
+                <span class="text-sm font-medium text-slate-700">Cuenta destino</span>
+                <select [(ngModel)]="formDestinationAccountId" name="destinationAccountId" class="mt-2 block w-full rounded-3xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition duration-200 focus:border-sky-500 focus:ring-2 focus:ring-sky-100">
+                  <option value="">Selecciona una cuenta destino</option>
+                  @for (acc of usableAccounts(); track acc.id) {
+                    <option [value]="acc.id">{{ acc.accountNumber }} &mdash; {{ acc.accountType }} &mdash; Saldo {{ acc.balance.toFixed(2) }}</option>
+                  }
+                </select>
+              </label>
+              @if (formErrors['destinationAccountId']) { <p class="mt-1 text-sm text-red-600">{{ formErrors['destinationAccountId'] }}</p> }
+            </div>
+          </div>
+        }
+
+        <div>
+          <label class="block">
+            <span class="text-sm font-medium text-slate-700">Valor</span>
+            <input [(ngModel)]="formAmount" name="amount" type="number" min="0.01" step="0.01" class="mt-2 block w-full rounded-3xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition duration-200 placeholder:text-slate-400 focus:border-sky-500 focus:ring-2 focus:ring-sky-100" />
+          </label>
+          @if (formErrors['amount']) { <p class="mt-1 text-sm text-red-600">{{ formErrors['amount'] }}</p> }
+        </div>
+
+        <div class="flex justify-end">
+          <app-button type="submit" [loading]="submitting" [disabled]="submitting">
+            {{ submitting ? 'Procesando...' : 'Crear transacci&oacute;n' }}
+          </app-button>
+        </div>
+      </form>
+    </app-modal>
+  }
+
+  <!-- Details Modal -->
+  @if (isDetailsOpen && activeTransaction) {
+    <app-modal [open]="isDetailsOpen" (onClose)="isDetailsOpen = false" title="Detalle de la transacci&oacute;n">
+      <div class="space-y-5 text-sm text-slate-700">
+        <div class="grid gap-4 md:grid-cols-2">
+          <div>
+            <p class="text-xs uppercase tracking-[0.22em] text-slate-500">ID</p>
+            <p class="mt-2 font-medium text-slate-900">{{ activeTransaction.id }}</p>
+          </div>
+          <div>
+            <p class="text-xs uppercase tracking-[0.22em] text-slate-500">Tipo</p>
+            <span [class]="'inline-flex rounded-full px-3 py-1 text-xs font-semibold mt-2 ' + badgeStyles[activeTransaction.type]">{{ activeTransaction.type }}</span>
+          </div>
+          <div>
+            <p class="text-xs uppercase tracking-[0.22em] text-slate-500">Monto</p>
+            <p class="mt-2 font-medium text-slate-900">${{ activeTransaction.amount.toFixed(2) }}</p>
+          </div>
+          <div>
+            <p class="text-xs uppercase tracking-[0.22em] text-slate-500">Fecha</p>
+            <p class="mt-2 font-medium text-slate-900">{{ activeTransaction.transactionDate | date:'short' }}</p>
+          </div>
+          <div>
+            <p class="text-xs uppercase tracking-[0.22em] text-slate-500">Cuenta origen</p>
+            <p class="mt-2 font-medium text-slate-900">{{ activeTransaction.sourceAccount?.accountNumber ?? 'N/A' }}</p>
+          </div>
+          <div>
+            <p class="text-xs uppercase tracking-[0.22em] text-slate-500">Cuenta destino</p>
+            <p class="mt-2 font-medium text-slate-900">{{ activeTransaction.destinationAccount?.accountNumber ?? 'N/A' }}</p>
+          </div>
+        </div>
+      </div>
+    </app-modal>
+  }
+
+  @if (error()) {
+    <div class="rounded-[32px] border border-red-200 bg-red-50 p-5 text-sm text-red-700">
+      Ocurri&oacute; un error al cargar las transacciones. Por favor recarga la p&aacute;gina o revisa la conexi&oacute;n con la API.
+    </div>
+  }
+</main>

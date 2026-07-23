@@ -1,0 +1,226 @@
+<main class="space-y-8">
+  <!-- Hero -->
+  <section class="relative overflow-hidden rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
+    <div class="absolute -top-16 -right-16 h-56 w-56 rounded-full bg-blue-500/10 blur-3xl"></div>
+    <div class="absolute -bottom-10 -left-10 h-40 w-40 rounded-full bg-cyan-400/10 blur-3xl"></div>
+    <div class="relative flex flex-col justify-between gap-8 lg:flex-row lg:items-center">
+      <div class="max-w-2xl">
+        <p class="text-sm font-medium text-blue-600">{{ greeting }}</p>
+        <h1 class="mt-2 text-4xl font-bold tracking-tight text-slate-900">Bienvenido al Panel Financiero</h1>
+        <p class="mt-4 text-lg leading-8 text-slate-600">Administra clientes, productos financieros y transacciones desde un &uacute;nico lugar con informaci&oacute;n actualizada en tiempo real.</p>
+        <div class="mt-8 flex items-center gap-3">
+          <div class="flex items-center gap-2 rounded-full bg-emerald-100 px-4 py-2">
+            <span class="h-2.5 w-2.5 rounded-full bg-emerald-500"></span>
+            <span class="text-sm font-medium text-emerald-700">conectado</span>
+          </div>
+          <div class="rounded-full bg-slate-100 px-4 py-2 text-sm text-slate-600">Datos sincronizados</div>
+        </div>
+      </div>
+      <div class="grid w-full max-w-sm gap-4">
+        <a routerLink="/clientes" class="group flex items-center justify-between rounded-2xl border border-slate-200 bg-slate-50 p-5 transition hover:border-blue-500 hover:bg-white hover:shadow-md">
+          <div class="flex items-center gap-4">
+            <div class="rounded-xl bg-blue-100 p-3 text-blue-600">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-[22px] w-[22px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            </div>
+            <div>
+              <p class="font-semibold text-slate-900">Nuevo Cliente</p>
+              <p class="text-sm text-slate-500">Registrar un cliente</p>
+            </div>
+          </div>
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-slate-400 group-hover:text-blue-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+        </a>
+        <a routerLink="/cuentas" class="group flex items-center justify-between rounded-2xl border border-slate-200 bg-slate-50 p-5 transition hover:border-blue-500 hover:bg-white hover:shadow-md">
+          <div class="flex items-center gap-4">
+            <div class="rounded-xl bg-emerald-100 p-3 text-emerald-600">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-[22px] w-[22px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/></svg>
+            </div>
+            <div>
+              <p class="font-semibold text-slate-900">Crear Cuenta</p>
+              <p class="text-sm text-slate-500">Abrir un producto financiero</p>
+            </div>
+          </div>
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-slate-400 group-hover:text-emerald-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Stats -->
+  <section class="grid gap-6 lg:grid-cols-3">
+    @for (stat of stats(); track stat.title) {
+      <article class="group relative overflow-hidden rounded-3xl border border-slate-200 bg-white p-6 transition-all duration-300 hover:-translate-y-1 hover:border-blue-200 hover:shadow-xl">
+        <div class="absolute -right-12 -top-12 h-40 w-40 rounded-full bg-blue-500/5 blur-3xl transition group-hover:bg-blue-500/10"></div>
+        <div class="relative">
+          <div class="flex items-start justify-between">
+            <div>
+              <p class="text-xs font-semibold uppercase tracking-[0.30em] text-slate-400">{{ stat.title }}</p>
+              <h2 class="mt-4 text-4xl font-bold tracking-tight text-slate-900">{{ stat.value }}</h2>
+            </div>
+            <div [class]="stat.accentClass + ' flex h-14 w-14 items-center justify-center rounded-2xl'">
+              @if (stat.title === 'Clientes') {
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+              } @else if (stat.title === 'Productos') {
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/></svg>
+              } @else {
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+              }
+            </div>
+          </div>
+          <p class="mt-5 text-sm leading-6 text-slate-500">{{ stat.subtitle }}</p>
+          <div class="mt-6 flex items-center justify-between border-t border-slate-100 pt-5">
+            <div class="flex items-center gap-2 rounded-full bg-emerald-100 px-3 py-1">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-emerald-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+              <span class="text-xs font-semibold text-emerald-700">Activo</span>
+            </div>
+            <span class="text-xs text-slate-400">Actualizado ahora</span>
+          </div>
+        </div>
+      </article>
+    }
+  </section>
+
+  <!-- Activity + Quick Actions -->
+  <section class="grid gap-6 xl:grid-cols-[2fr_1fr]">
+    <!-- Activity Card -->
+    <section class="rounded-3xl border border-slate-200 bg-white p-7 shadow-sm">
+      <div class="flex items-center justify-between">
+        <div>
+          <h2 class="text-xl font-bold text-slate-900">Actividad reciente</h2>
+          <p class="mt-1 text-sm text-slate-500">&Uacute;ltimos movimientos registrados</p>
+        </div>
+      </div>
+      <div class="mt-8 space-y-5">
+        @for (activity of activities(); track $index) {
+          <div class="flex items-center justify-between rounded-2xl p-4 transition hover:bg-slate-50">
+            <div class="flex items-center gap-4">
+              @if (activity.type === 'CLIENT') {
+                <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-100 text-blue-600">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                </div>
+              } @else if (activity.type === 'ACCOUNT') {
+                <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-600">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/></svg>
+                </div>
+              } @else if (activity.type === 'DEPOSIT') {
+                <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-cyan-100 text-cyan-600">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="M19 12H5"/></svg>
+                </div>
+              } @else {
+                <div class="flex h-12 w-12 items-center justify-center rounded-2xl" [class]="activity.type === 'TRANSFER' ? 'bg-violet-100 text-violet-600' : 'bg-amber-100 text-amber-600'">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+                </div>
+              }
+              <div>
+                <p class="font-semibold text-slate-900">{{ activity.title }}</p>
+                <p class="text-sm text-slate-500">{{ activity.description }}</p>
+              </div>
+            </div>
+            <span class="text-sm text-slate-400">{{ timeAgo(activity.date) }}</span>
+          </div>
+        }
+      </div>
+    </section>
+
+    <!-- Quick Actions -->
+    <section class="rounded-3xl border border-slate-200 bg-white p-7 shadow-sm">
+      <h2 class="text-xl font-bold text-slate-900">Acciones r&aacute;pidas</h2>
+      <p class="mt-1 text-sm text-slate-500">Accesos directos del sistema</p>
+      <div class="mt-8 space-y-4">
+        <a routerLink="/clientes" class="group flex items-center gap-4 rounded-2xl border border-slate-200 p-4 transition-all hover:border-blue-200 hover:bg-slate-50 hover:shadow-md">
+          <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-100 text-blue-600">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          </div>
+          <div class="flex-1">
+            <h3 class="font-semibold text-slate-900">Nuevo cliente</h3>
+            <p class="text-sm text-slate-500">Registrar un cliente</p>
+          </div>
+        </a>
+        <a routerLink="/cuentas" class="group flex items-center gap-4 rounded-2xl border border-slate-200 p-4 transition-all hover:border-blue-200 hover:bg-slate-50 hover:shadow-md">
+          <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-100 text-emerald-600">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/></svg>
+          </div>
+          <div class="flex-1">
+            <h3 class="font-semibold text-slate-900">Nueva cuenta</h3>
+            <p class="text-sm text-slate-500">Abrir una cuenta</p>
+          </div>
+        </a>
+        <a routerLink="/transacciones" class="group flex items-center gap-4 rounded-2xl border border-slate-200 p-4 transition-all hover:border-blue-200 hover:bg-slate-50 hover:shadow-md">
+          <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-violet-100 text-violet-600">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+          </div>
+          <div class="flex-1">
+            <h3 class="font-semibold text-slate-900">Transferencia</h3>
+            <p class="text-sm text-slate-500">Registrar movimiento</p>
+          </div>
+        </a>
+      </div>
+    </section>
+  </section>
+
+  <!-- Module Cards -->
+  <section class="rounded-2xl border border-brand-border bg-white p-6 shadow-soft">
+    <div class="mb-6">
+      <h2 class="text-lg font-semibold text-slate-950">M&oacute;dulos principales</h2>
+      <p class="mt-2 text-sm leading-6 text-slate-500">Accede r&aacute;pidamente a cada m&oacute;dulo del sistema.</p>
+    </div>
+    <div class="grid gap-6 md:grid-cols-3">
+      <a routerLink="/clientes" class="group relative overflow-hidden rounded-3xl border border-slate-200 bg-white p-6 transition-all duration-300 hover:-translate-y-1 hover:border-blue-200 hover:shadow-xl">
+        <div class="absolute -right-10 -top-10 h-32 w-32 rounded-full bg-blue-500/5 blur-3xl transition-all duration-500 group-hover:bg-blue-500/10"></div>
+        <div class="relative">
+          <span class="inline-flex rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-slate-500">M&oacute;dulo</span>
+          <div class="mt-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-600 to-sky-500 text-white shadow-lg shadow-blue-500/20 transition-transform duration-300 group-hover:scale-110">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          </div>
+          <div class="mt-6">
+            <h3 class="text-xl font-bold text-slate-900">Clientes</h3>
+            <p class="mt-3 text-sm leading-7 text-slate-500">Administra toda la informaci&oacute;n de los clientes.</p>
+          </div>
+          <div class="mt-8 flex items-center justify-between border-t border-slate-100 pt-5">
+            <span class="text-sm font-semibold text-blue-600">Abrir m&oacute;dulo</span>
+            <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 transition-all duration-300 group-hover:bg-blue-600 group-hover:text-white">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 transition-transform duration-300 group-hover:rotate-45" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg>
+            </div>
+          </div>
+        </div>
+      </a>
+      <a routerLink="/cuentas" class="group relative overflow-hidden rounded-3xl border border-slate-200 bg-white p-6 transition-all duration-300 hover:-translate-y-1 hover:border-blue-200 hover:shadow-xl">
+        <div class="absolute -right-10 -top-10 h-32 w-32 rounded-full bg-blue-500/5 blur-3xl transition-all duration-500 group-hover:bg-blue-500/10"></div>
+        <div class="relative">
+          <span class="inline-flex rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-slate-500">M&oacute;dulo</span>
+          <div class="mt-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-600 to-sky-500 text-white shadow-lg shadow-blue-500/20 transition-transform duration-300 group-hover:scale-110">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/></svg>
+          </div>
+          <div class="mt-6">
+            <h3 class="text-xl font-bold text-slate-900">Productos</h3>
+            <p class="mt-3 text-sm leading-7 text-slate-500">Gestiona cuentas de ahorro y corrientes.</p>
+          </div>
+          <div class="mt-8 flex items-center justify-between border-t border-slate-100 pt-5">
+            <span class="text-sm font-semibold text-blue-600">Abrir m&oacute;dulo</span>
+            <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 transition-all duration-300 group-hover:bg-blue-600 group-hover:text-white">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 transition-transform duration-300 group-hover:rotate-45" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg>
+            </div>
+          </div>
+        </div>
+      </a>
+      <a routerLink="/transacciones" class="group relative overflow-hidden rounded-3xl border border-slate-200 bg-white p-6 transition-all duration-300 hover:-translate-y-1 hover:border-blue-200 hover:shadow-xl">
+        <div class="absolute -right-10 -top-10 h-32 w-32 rounded-full bg-blue-500/5 blur-3xl transition-all duration-500 group-hover:bg-blue-500/10"></div>
+        <div class="relative">
+          <span class="inline-flex rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-slate-500">M&oacute;dulo</span>
+          <div class="mt-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-600 to-sky-500 text-white shadow-lg shadow-blue-500/20 transition-transform duration-300 group-hover:scale-110">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+          </div>
+          <div class="mt-6">
+            <h3 class="text-xl font-bold text-slate-900">Transacciones</h3>
+            <p class="mt-3 text-sm leading-7 text-slate-500">Controla retiros, consignaciones y transferencias.</p>
+          </div>
+          <div class="mt-8 flex items-center justify-between border-t border-slate-100 pt-5">
+            <span class="text-sm font-semibold text-blue-600">Abrir m&oacute;dulo</span>
+            <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 transition-all duration-300 group-hover:bg-blue-600 group-hover:text-white">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 transition-transform duration-300 group-hover:rotate-45" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg>
+            </div>
+          </div>
+        </div>
+      </a>
+    </div>
+  </section>
+</main>

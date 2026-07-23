@@ -36,18 +36,16 @@ services:
       db:
         condition: service_healthy
     restart: unless-stopped
-
-  frontend:
+    
+  frontend-angular:
     build:
-      context: ./frontend
+      context: ./banking-frontend-angular
       dockerfile: ./deploy/Dockerfile
       args:
-        NEXT_PUBLIC_API_URL: http://localhost:8080/api
-    container_name: banking-frontend
-    environment:
-      NEXT_PUBLIC_API_URL: http://localhost:8080/api
+        API_URL: http://localhost:8080/api
+    container_name: banking-frontend-angular
     ports:
-      - "3000:3000"
+      - "4200:80"
     depends_on:
       backend:
         condition: service_started
